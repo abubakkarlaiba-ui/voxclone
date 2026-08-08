@@ -96,3 +96,30 @@ export interface ProviderCapabilities {
     formats: { value: string; label: string }[];
   };
 }
+
+export interface HistoryItem {
+  id: string;
+  voiceId: string;
+  voiceName: string;
+  text: string;
+  audioUrl: string;
+  duration: number;
+  format: string;
+  options: GenerateOptions;
+  createdAt: string;
+}
+
+export interface HistoryListParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+  voiceId?: string;
+}
+
+export interface HistoryListResult {
+  items: HistoryItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}

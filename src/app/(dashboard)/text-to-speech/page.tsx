@@ -249,6 +249,21 @@ export default function TextToSpeechPage() {
       if (data.success) {
         setGeneratedAudio(data.data);
         addNotification("success", "Speech generated successfully!");
+
+        const voiceName = voices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
+        fetch("/api/history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            voiceId: selectedVoiceId,
+            voiceName,
+            text: data.data.text,
+            audioUrl: data.data.audioUrl,
+            duration: data.data.duration,
+            format: options.format || "mp3",
+            options,
+          }),
+        }).catch(() => {});
       } else {
         addNotification("error", data.error?.message || "Generation failed");
       }
@@ -257,7 +272,7 @@ export default function TextToSpeechPage() {
     } finally {
       setIsGenerating(false);
     }
-  }, [canGenerate, selectedVoiceId, text, options, addNotification]);
+  }, [canGenerate, selectedVoiceId, text, options, addNotification, voices]);
 
   const handleRegenerate = useCallback(() => {
     handleGenerate();
