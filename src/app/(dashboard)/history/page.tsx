@@ -93,7 +93,7 @@ export default function HistoryPage() {
                   </div>
                   {item.audioUrl ? (
                     <div className="w-64 flex-shrink-0">
-                      <AudioPlayer src={item.audioUrl} />
+                      <AudioPlayer src={item.audioUrl} compact showDownload />
                     </div>
                   ) : (
                     <span className="text-xs text-text-muted italic">No audio</span>

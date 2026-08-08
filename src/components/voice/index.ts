@@ -6,3 +6,4 @@ export { Waveform } from "./Waveform";
 export { VoiceSampleItem } from "./VoiceSampleItem";
 export { AudioUploader } from "./AudioUploader";
 export { VoiceProfileCard } from "./VoiceProfileCard";
+export { PlaybackWaveform } from "./PlaybackWaveform";

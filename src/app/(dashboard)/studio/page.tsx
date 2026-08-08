@@ -392,7 +392,7 @@ export default function StudioPage() {
                   barCount={64}
                   className="h-10 mb-3"
                 />
-                <AudioPlayer src={recorder.recording.url} label="Your recording" />
+                <AudioPlayer src={recorder.recording.url} label="Your recording" compact showDownload />
               </div>
 
               {/* Save form */}

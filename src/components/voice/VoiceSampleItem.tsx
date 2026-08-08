@@ -26,7 +26,7 @@ export function VoiceSampleItem({ sample, onDelete, className }: VoiceSampleItem
         </p>
       </div>
       <div className="flex-shrink-0">
-        <AudioPlayer src={sample.url || "#"} />
+        <AudioPlayer src={sample.url || "#"} compact />
       </div>
       {onDelete && (
         <Button
