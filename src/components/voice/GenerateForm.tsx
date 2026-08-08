@@ -25,7 +25,6 @@ export function GenerateForm({
   const [text, setText] = useState("");
   const [options, setOptions] = useState<GenerateOptions>({
     speed: 1,
-    pitch: 1,
     format: "mp3",
   });
 

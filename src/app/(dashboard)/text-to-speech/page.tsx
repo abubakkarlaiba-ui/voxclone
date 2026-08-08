@@ -11,7 +11,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { useNotification } from "@/hooks";
 import { NotificationContainer } from "@/components/ui/Notification";
 import { cn, formatDuration } from "@/lib/utils";
-import type { VoiceProfile, GeneratedAudio, GenerateOptions } from "@/types";
+import type { VoiceProfile, GeneratedAudio, GenerateOptions, ProviderCapabilities } from "@/types";
 
 const TEXT_LIMITS = { min: 1, max: 5000 } as const;
 
@@ -114,6 +114,137 @@ function generateFilename(text: string) {
   return `voxclone-${slug || "speech"}-${Date.now()}`;
 }
 
+function SliderControl({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  tooltip,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step: number;
+  tooltip: string;
+}) {
+  return (
+    <div className="group">
+      <div className="flex items-center justify-between mb-1.5">
+        <label className="flex items-center gap-1.5 text-xs font-medium text-text-secondary">
+          {label}
+          <span className="relative">
+            <svg className="h-3 w-3 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-52 -translate-x-1/2 rounded-lg border border-border-primary bg-bg-elevated p-2.5 text-[11px] leading-relaxed text-text-secondary opacity-0 shadow-lg transition-opacity group-hover:opacity-100 z-10">
+              {tooltip}
+            </span>
+          </span>
+        </label>
+        <span className="text-[11px] font-mono text-text-muted tabular-nums">{value.toFixed(2)}</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-primary accent-accent-primary"
+        aria-label={label}
+      />
+    </div>
+  );
+}
+
+function ToggleControl({
+  label,
+  value,
+  onChange,
+  tooltip,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+  tooltip: string;
+}) {
+  return (
+    <div className="group flex items-center justify-between">
+      <label className="flex items-center gap-1.5 text-xs font-medium text-text-secondary">
+        {label}
+        <span className="relative">
+          <svg className="h-3 w-3 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-52 -translate-x-1/2 rounded-lg border border-border-primary bg-bg-elevated p-2.5 text-[11px] leading-relaxed text-text-secondary opacity-0 shadow-lg transition-opacity group-hover:opacity-100 z-10">
+            {tooltip}
+          </span>
+        </span>
+      </label>
+      <button
+        onClick={() => onChange(!value)}
+        className={cn(
+          "relative h-5 w-9 rounded-full transition-colors",
+          value ? "bg-accent-primary" : "bg-border-primary"
+        )}
+        role="switch"
+        aria-checked={value}
+        aria-label={label}
+      >
+        <span
+          className={cn(
+            "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
+            value ? "translate-x-4" : "translate-x-0.5"
+          )}
+        />
+      </button>
+    </div>
+  );
+}
+
+function SelectControl({
+  label,
+  value,
+  onChange,
+  options,
+  tooltip,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  tooltip: string;
+}) {
+  return (
+    <div className="group">
+      <label className="flex items-center gap-1.5 text-xs font-medium text-text-secondary mb-1.5">
+        {label}
+        <span className="relative">
+          <svg className="h-3 w-3 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-52 -translate-x-1/2 rounded-lg border border-border-primary bg-bg-elevated p-2.5 text-[11px] leading-relaxed text-text-secondary opacity-0 shadow-lg transition-opacity group-hover:opacity-100 z-10">
+            {tooltip}
+          </span>
+        </span>
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-border-primary bg-bg-tertiary px-3 py-2 text-sm text-text-primary transition-colors hover:border-border-secondary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/10"
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export default function TextToSpeechPage() {
   const router = useRouter();
   const { notifications, addNotification, removeNotification } = useNotification();
@@ -121,14 +252,13 @@ export default function TextToSpeechPage() {
   const [voices, setVoices] = useState<VoiceProfile[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState("");
   const [text, setText] = useState("");
-  const [options] = useState<GenerateOptions>({
-    speed: 1,
-    format: "mp3",
-  });
+  const [capabilities, setCapabilities] = useState<ProviderCapabilities | null>(null);
+  const [options, setOptions] = useState<GenerateOptions>({});
   const [generatedAudio, setGeneratedAudio] = useState<GeneratedAudio | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showControls, setShowControls] = useState(false);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -143,18 +273,37 @@ export default function TextToSpeechPage() {
     let active = true;
     (async () => {
       try {
-        const res = await fetch("/api/voices");
-        const data = await res.json();
+        const [voicesRes, capsRes] = await Promise.all([
+          fetch("/api/voices"),
+          fetch("/api/capabilities"),
+        ]);
+        const [voicesData, capsData] = await Promise.all([
+          voicesRes.json(),
+          capsRes.json(),
+        ]);
         if (!active) return;
-        if (data.success) {
-          const ready = data.data.filter((v: VoiceProfile) => v.status === "ready");
+        if (voicesData.success) {
+          const ready = voicesData.data.filter((v: VoiceProfile) => v.status === "ready");
           setVoices(ready);
           if (ready.length > 0) setSelectedVoiceId(ready[0].id);
         } else {
-          setError(data.error?.message || "Failed to load voices");
+          setError(voicesData.error?.message || "Failed to load voices");
+        }
+        if (capsData.success) {
+          setCapabilities(capsData.data);
+          const c = capsData.data.controls;
+          setOptions({
+            speed: c.speed.default,
+            stability: c.stability.default,
+            similarityBoost: c.similarityBoost.default,
+            style: c.style.default,
+            useSpeakerBoost: c.speakerBoost.default,
+            language: c.languages[0]?.code,
+            format: "mp3",
+          });
         }
       } catch {
-        if (active) setError("Failed to load voices.");
+        if (active) setError("Failed to load data.");
       } finally {
         if (active) setIsLoading(false);
       }
@@ -173,6 +322,10 @@ export default function TextToSpeechPage() {
   }, [text]);
 
   const canGenerate = text.trim().length >= TEXT_LIMITS.min && text.trim().length <= TEXT_LIMITS.max && !textError && !!selectedVoiceId && !isGenerating;
+
+  const handleOptionChange = useCallback((key: keyof GenerateOptions, value: unknown) => {
+    setOptions((prev) => ({ ...prev, [key]: value }));
+  }, []);
 
   const handleGenerate = useCallback(async () => {
     if (!canGenerate) return;
@@ -490,7 +643,109 @@ export default function TextToSpeechPage() {
         </CardContent>
       </Card>
 
-      {/* Step 3: Generation Progress */}
+      {/* Step 3: Voice Controls */}
+      {capabilities && (
+        <Card variant="glass" className="mb-6">
+          <button
+            onClick={() => setShowControls(!showControls)}
+            className="flex w-full items-center justify-between px-6 py-4 text-left"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-primary/10 text-xs font-bold text-accent-primary">3</div>
+              <div>
+                <p className="text-sm font-semibold text-text-primary">Voice Controls</p>
+                <p className="text-xs text-text-muted">
+                  Adjust speed, stability, similarity, and output format.
+                  {capabilities.provider !== "mock" && (
+                    <span className="ml-1 text-accent-primary">Powered by {capabilities.provider}</span>
+                  )}
+                </p>
+              </div>
+            </div>
+            <svg
+              className={cn(
+                "h-5 w-5 text-text-muted transition-transform",
+                showControls && "rotate-180"
+              )}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showControls && (
+            <CardContent className="border-t border-border-primary pt-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <SliderControl
+                  label="Speed"
+                  value={options.speed ?? capabilities.controls.speed.default}
+                  onChange={(v) => handleOptionChange("speed", v)}
+                  min={capabilities.controls.speed.min}
+                  max={capabilities.controls.speed.max}
+                  step={capabilities.controls.speed.step}
+                  tooltip={capabilities.controls.speed.tooltip}
+                />
+                <SliderControl
+                  label="Stability"
+                  value={options.stability ?? capabilities.controls.stability.default}
+                  onChange={(v) => handleOptionChange("stability", v)}
+                  min={capabilities.controls.stability.min}
+                  max={capabilities.controls.stability.max}
+                  step={capabilities.controls.stability.step}
+                  tooltip={capabilities.controls.stability.tooltip}
+                />
+                <SliderControl
+                  label="Similarity"
+                  value={options.similarityBoost ?? capabilities.controls.similarityBoost.default}
+                  onChange={(v) => handleOptionChange("similarityBoost", v)}
+                  min={capabilities.controls.similarityBoost.min}
+                  max={capabilities.controls.similarityBoost.max}
+                  step={capabilities.controls.similarityBoost.step}
+                  tooltip={capabilities.controls.similarityBoost.tooltip}
+                />
+                <SliderControl
+                  label="Style"
+                  value={options.style ?? capabilities.controls.style.default}
+                  onChange={(v) => handleOptionChange("style", v)}
+                  min={capabilities.controls.style.min}
+                  max={capabilities.controls.style.max}
+                  step={capabilities.controls.style.step}
+                  tooltip={capabilities.controls.style.tooltip}
+                />
+
+                <ToggleControl
+                  label="Speaker Boost"
+                  value={options.useSpeakerBoost ?? capabilities.controls.speakerBoost.default}
+                  onChange={(v) => handleOptionChange("useSpeakerBoost", v)}
+                  tooltip={capabilities.controls.speakerBoost.tooltip}
+                />
+
+                {capabilities.controls.languages.length > 1 && (
+                  <SelectControl
+                    label="Language"
+                    value={options.language ?? capabilities.controls.languages[0].code}
+                    onChange={(v) => handleOptionChange("language", v)}
+                    options={capabilities.controls.languages.map((l) => ({ value: l.code, label: l.name }))}
+                    tooltip="Select the output language for multilingual speech generation."
+                  />
+                )}
+
+                <SelectControl
+                  label="Output Format"
+                  value={options.format ?? "mp3"}
+                  onChange={(v) => handleOptionChange("format", v as GenerateOptions["format"])}
+                  options={capabilities.controls.formats}
+                  tooltip="MP3 is smallest and most compatible. WAV is lossless but larger."
+                />
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      )}
+
+      {/* Step 4: Generation Progress */}
       {isGenerating && (
         <Card variant="glass" className="mb-6 animate-fade-in-up">
           <CardContent className="py-10">
@@ -517,13 +772,13 @@ export default function TextToSpeechPage() {
         </Card>
       )}
 
-      {/* Step 4: Audio Result */}
+      {/* Step 5: Audio Result */}
       {generatedAudio && !isGenerating && (
         <Card variant="glass" className="mb-6 animate-fade-in-up">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-success/10 text-xs font-bold text-success">3</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-success/10 text-xs font-bold text-success">4</div>
                 <div>
                   <CardTitle>Generated Audio</CardTitle>
                   <CardDescription>Play, adjust, and download your generated speech.</CardDescription>
@@ -542,7 +797,6 @@ export default function TextToSpeechPage() {
 
             {/* Transport controls */}
             <div className="flex items-center gap-4">
-              {/* Restart */}
               <button
                 onClick={handleRestart}
                 className="flex h-9 w-9 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-bg-tertiary hover:text-text-primary"
@@ -553,7 +807,6 @@ export default function TextToSpeechPage() {
                 </svg>
               </button>
 
-              {/* Play / Pause */}
               <button
                 onClick={isPlaying ? handlePause : handlePlay}
                 className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-primary text-white shadow-lg shadow-accent-primary/25 transition-all hover:bg-accent-primary/90 hover:shadow-accent-primary/30"
@@ -570,7 +823,6 @@ export default function TextToSpeechPage() {
                 )}
               </button>
 
-              {/* Seek bar */}
               <div className="flex flex-1 items-center gap-2">
                 <span className="w-10 text-right text-[11px] font-mono text-text-muted tabular-nums">
                   {formatDuration(currentTime)}

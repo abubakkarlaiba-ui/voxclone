@@ -76,6 +76,23 @@ export interface GenerateRequest {
 
 export interface GenerateOptions {
   speed?: number;
-  pitch?: number;
+  stability?: number;
+  similarityBoost?: number;
+  style?: number;
+  useSpeakerBoost?: boolean;
+  language?: string;
   format?: "mp3" | "wav" | "ogg";
+}
+
+export interface ProviderCapabilities {
+  provider: string;
+  controls: {
+    speed: { min: number; max: number; step: number; default: number; tooltip: string };
+    stability: { min: number; max: number; step: number; default: number; tooltip: string };
+    similarityBoost: { min: number; max: number; step: number; default: number; tooltip: string };
+    style: { min: number; max: number; step: number; default: number; tooltip: string };
+    speakerBoost: { default: boolean; tooltip: string };
+    languages: { code: string; name: string }[];
+    formats: { value: string; label: string }[];
+  };
 }

@@ -4,6 +4,7 @@ import type {
   CloneVoiceResponse,
   GenerateSpeechRequest,
   GenerateSpeechResponse,
+  ProviderCapabilities,
 } from "./types";
 
 /**
@@ -19,6 +20,42 @@ export class MockVoiceProvider implements VoiceProvider {
 
   isConfigured(): boolean {
     return true;
+  }
+
+  getCapabilities(): ProviderCapabilities {
+    return {
+      provider: "mock",
+      controls: {
+        speed: {
+          min: 0.7, max: 1.2, step: 0.05, default: 1,
+          tooltip: "Adjusts speech rate. Values below 1.0 slow down, above 1.0 speed up.",
+        },
+        stability: {
+          min: 0, max: 1, step: 0.05, default: 0.5,
+          tooltip: "Higher values produce more consistent, monotone speech. Lower values add emotional range.",
+        },
+        similarityBoost: {
+          min: 0, max: 1, step: 0.05, default: 0.75,
+          tooltip: "How closely the AI adheres to the original voice. Higher = closer match.",
+        },
+        style: {
+          min: 0, max: 1, step: 0.05, default: 0,
+          tooltip: "Exaggerates the speaking style. Higher values amplify expressiveness but may sound unnatural.",
+        },
+        speakerBoost: {
+          default: true,
+          tooltip: "Boosts similarity to the original speaker. Slightly increases latency.",
+        },
+        languages: [
+          { code: "en", name: "English" },
+        ],
+        formats: [
+          { value: "mp3", label: "MP3" },
+          { value: "wav", label: "WAV" },
+          { value: "ogg", label: "OGG" },
+        ],
+      },
+    };
   }
 
   async cloneVoice(request: CloneVoiceRequest): Promise<CloneVoiceResponse> {

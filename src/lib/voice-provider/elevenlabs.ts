@@ -5,6 +5,7 @@ import type {
   CloneVoiceResponse,
   GenerateSpeechRequest,
   GenerateSpeechResponse,
+  ProviderCapabilities,
 } from "./types";
 import {
   VoiceProviderError,
@@ -33,6 +34,53 @@ export class ElevenLabsProvider implements VoiceProvider {
 
   isConfigured(): boolean {
     return Boolean(this.config.apiKey && this.config.apiKey.length > 0);
+  }
+
+  getCapabilities(): ProviderCapabilities {
+    return {
+      provider: "elevenlabs",
+      controls: {
+        speed: {
+          min: 0.7, max: 1.2, step: 0.05, default: 1,
+          tooltip: "Adjusts speech rate. Values below 1.0 slow down, above 1.0 speed up.",
+        },
+        stability: {
+          min: 0, max: 1, step: 0.05, default: 0.5,
+          tooltip: "Higher values produce more consistent, monotone speech. Lower values add emotional range.",
+        },
+        similarityBoost: {
+          min: 0, max: 1, step: 0.05, default: 0.75,
+          tooltip: "How closely the AI adheres to the original voice. Higher = closer match.",
+        },
+        style: {
+          min: 0, max: 1, step: 0.05, default: 0,
+          tooltip: "Exaggerates the speaking style. Higher values amplify expressiveness but may sound unnatural.",
+        },
+        speakerBoost: {
+          default: true,
+          tooltip: "Boosts similarity to the original speaker. Slightly increases latency.",
+        },
+        languages: [
+          { code: "en", name: "English" },
+          { code: "es", name: "Spanish" },
+          { code: "fr", name: "French" },
+          { code: "de", name: "German" },
+          { code: "it", name: "Italian" },
+          { code: "pt", name: "Portuguese" },
+          { code: "pl", name: "Polish" },
+          { code: "hi", name: "Hindi" },
+          { code: "ar", name: "Arabic" },
+          { code: "ja", name: "Japanese" },
+          { code: "ko", name: "Korean" },
+          { code: "zh", name: "Chinese" },
+        ],
+        formats: [
+          { value: "mp3", label: "MP3" },
+          { value: "wav", label: "WAV" },
+          { value: "ogg", label: "OGG" },
+        ],
+      },
+    };
   }
 
   async cloneVoice(request: CloneVoiceRequest): Promise<CloneVoiceResponse> {

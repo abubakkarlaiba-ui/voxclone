@@ -78,6 +78,15 @@ export async function POST(
       );
     }
 
+    const caps = provider.getCapabilities();
+
+    const clamped = {
+      speed: Math.max(caps.controls.speed.min, Math.min(caps.controls.speed.max, options?.speed ?? caps.controls.speed.default)),
+      stability: Math.max(caps.controls.stability.min, Math.min(caps.controls.stability.max, options?.stability ?? caps.controls.stability.default)),
+      similarityBoost: Math.max(caps.controls.similarityBoost.min, Math.min(caps.controls.similarityBoost.max, options?.similarityBoost ?? caps.controls.similarityBoost.default)),
+      style: Math.max(caps.controls.style.min, Math.min(caps.controls.style.max, options?.style ?? caps.controls.style.default)),
+    };
+
     const outputFormat = options?.format === "wav"
       ? "wav_44100"
       : options?.format === "ogg"
@@ -88,9 +97,13 @@ export async function POST(
       providerVoiceId: profile.providerVoiceId,
       text: text.trim(),
       voiceSettings: {
-        speed: options?.speed ?? 1,
+        speed: clamped.speed,
+        stability: clamped.stability,
+        similarityBoost: clamped.similarityBoost,
+        style: clamped.style,
+        useSpeakerBoost: options?.useSpeakerBoost ?? caps.controls.speakerBoost.default,
       },
-      outputFormat,
+      outputFormat: outputFormat as never,
     });
 
     const audioBase64 = result.audioBuffer.toString("base64");
