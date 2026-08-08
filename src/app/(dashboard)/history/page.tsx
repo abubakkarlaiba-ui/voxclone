@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
 import { HistoryItemCard } from "@/components/history";
 import { useNotification } from "@/hooks";
 import { NotificationContainer } from "@/components/ui/Notification";
@@ -22,6 +23,8 @@ export default function HistoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   const fetchHistory = useCallback(async (p: number, q: string) => {
     setIsLoading(true);
@@ -78,15 +81,19 @@ export default function HistoryPage() {
   };
 
   const handleClearAll = async () => {
+    setIsClearing(true);
     try {
       const res = await fetch("/api/history", { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
         setData({ items: [], total: 0, page: 1, pageSize: PAGE_SIZE, totalPages: 0 });
-        addNotification("success", "History cleared.");
+        addNotification("success", "All generation history deleted.");
       }
     } catch {
       addNotification("error", "Failed to clear history.");
+    } finally {
+      setIsClearing(false);
+      setShowClearAllConfirm(false);
     }
   };
 
@@ -103,7 +110,7 @@ export default function HistoryPage() {
           </p>
         </div>
         {data && data.total > 0 && (
-          <Button variant="ghost" size="sm" onClick={handleClearAll} className="text-text-muted hover:text-error">
+          <Button variant="ghost" size="sm" onClick={() => setShowClearAllConfirm(true)} className="text-text-muted hover:text-error">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -210,6 +217,16 @@ export default function HistoryPage() {
           )}
         </>
       )}
+
+      <ConfirmationDialog
+        isOpen={showClearAllConfirm}
+        onClose={() => setShowClearAllConfirm(false)}
+        onConfirm={handleClearAll}
+        title="Delete All Generated Audio"
+        description={`This will permanently delete all ${data?.total ?? 0} generated audio files from your history. This cannot be undone.`}
+        confirmLabel="Delete All"
+        isLoading={isClearing}
+      />
 
       <NotificationContainer notifications={notifications} onDismiss={removeNotification} />
     </div>

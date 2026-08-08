@@ -1,4 +1,5 @@
-import { APP_NAME } from "@/lib/constants";
+import Link from "next/link";
+import { APP_NAME, ROUTES } from "@/lib/constants";
 
 export function Footer() {
   return (
@@ -17,9 +18,8 @@ export function Footer() {
             &copy; {new Date().getFullYear()} {APP_NAME}. All rights reserved.
           </p>
           <div className="flex gap-4">
-            <a href="#" className="text-xs text-text-muted hover:text-text-secondary transition-colors">Privacy</a>
-            <a href="#" className="text-xs text-text-muted hover:text-text-secondary transition-colors">Terms</a>
-            <a href="#" className="text-xs text-text-muted hover:text-text-secondary transition-colors">Contact</a>
+            <Link href={ROUTES.PRIVACY} className="text-xs text-text-muted hover:text-text-secondary transition-colors">Privacy</Link>
+            <Link href={ROUTES.TERMS} className="text-xs text-text-muted hover:text-text-secondary transition-colors">Terms</Link>
           </div>
         </div>
       </div>

@@ -21,6 +21,8 @@ export const ROUTES = {
   LIBRARY: "/library",
   HISTORY: "/history",
   SETTINGS: "/settings",
+  PRIVACY: "/privacy",
+  TERMS: "/terms",
 } as const;
 
 export const NAV_ITEMS = [

@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { AudioUploader } from "@/components/voice/AudioUploader";
 import { VoiceSampleItem } from "@/components/voice/VoiceSampleItem";
-import { Modal } from "@/components/ui/Modal";
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useNotification } from "@/hooks";
@@ -15,6 +16,7 @@ import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { NotificationContainer } from "@/components/ui/Notification";
 import { Waveform } from "@/components/voice/Waveform";
 import { cn, formatDuration } from "@/lib/utils";
+import { ROUTES } from "@/lib/constants";
 import type { VoiceProfile, VoiceSample, VoiceProfileStatus } from "@/types";
 
 const statusConfig: Record<VoiceProfileStatus, { label: string; className: string; dotClassName: string; description: string }> = {
@@ -58,8 +60,11 @@ export default function VoiceProfileDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processConsent, setProcessConsent] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<VoiceSample | null>(null);
   const [isDeletingSample, setIsDeletingSample] = useState(false);
+  const [showDeleteProfile, setShowDeleteProfile] = useState(false);
+  const [isDeletingProfile, setIsDeletingProfile] = useState(false);
   const [showRecordPanel, setShowRecordPanel] = useState(false);
 
   const { notifications, addNotification, removeNotification } = useNotification();
@@ -232,6 +237,10 @@ export default function VoiceProfileDetailPage() {
   }, [profileId, deleteTarget, addNotification, fetchProfile]);
 
   const handleProcess = useCallback(async () => {
+    if (!processConsent) {
+      addNotification("warning", "You must confirm voice ownership before processing.");
+      return;
+    }
     setIsProcessing(true);
     try {
       const res = await fetch(`/api/voices/${profileId}/process`, {
@@ -240,6 +249,7 @@ export default function VoiceProfileDetailPage() {
       const data = await res.json();
       if (data.success) {
         setProfile(data.data);
+        setProcessConsent(false);
         addNotification("info", "Voice processing started. This may take a few minutes.");
       } else {
         addNotification("error", data.error?.message || "Failed to start processing");
@@ -249,20 +259,24 @@ export default function VoiceProfileDetailPage() {
     } finally {
       setIsProcessing(false);
     }
-  }, [profileId, addNotification]);
+  }, [profileId, processConsent, addNotification]);
 
   const handleDeleteProfile = useCallback(async () => {
+    setIsDeletingProfile(true);
     try {
       const res = await fetch(`/api/voices/${profileId}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
-        addNotification("success", "Profile deleted.");
+        addNotification("success", "Voice profile and all associated data deleted.");
         router.push("/library");
       } else {
         addNotification("error", data.error?.message || "Failed to delete");
       }
     } catch {
       addNotification("error", "Failed to delete profile.");
+    } finally {
+      setIsDeletingProfile(false);
+      setShowDeleteProfile(false);
     }
   }, [profileId, addNotification, router]);
 
@@ -536,43 +550,78 @@ export default function VoiceProfileDetailPage() {
       </Card>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-3">
-        {canProcess && (
-          <Button onClick={handleProcess} isLoading={isProcessing}>
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Process Voice with AI
-          </Button>
-        )}
+      {canProcess && (
+        <Card variant="glass" className="mb-6">
+          <CardContent className="py-6">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                <input
+                  type="checkbox"
+                  id="process-consent"
+                  checked={processConsent}
+                  onChange={(e) => setProcessConsent(e.target.checked)}
+                  className="h-4 w-4 rounded border-border-primary bg-bg-primary text-accent-primary focus:ring-accent-primary/20"
+                />
+              </div>
+              <label htmlFor="process-consent" className="text-sm leading-relaxed text-text-secondary cursor-pointer">
+                I confirm that this voice <span className="font-medium text-text-primary">belongs to me</span>, or I have{" "}
+                <span className="font-medium text-text-primary">explicit permission</span> from the voice owner to clone it.
+                I understand that impersonating people without permission is prohibited.{" "}
+                <Link href={ROUTES.TERMS} target="_blank" className="text-accent-primary hover:underline">
+                  View Terms
+                </Link>
+              </label>
+            </div>
+            <div className="mt-4">
+              <Button onClick={handleProcess} isLoading={isProcessing} disabled={!processConsent}>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Process Voice with AI
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {profile.status === "ready" && (
+      {profile.status === "ready" && (
+        <div className="mb-6">
           <Button onClick={() => router.push(`/text-to-speech?voice=${profile.id}`)}>
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
             </svg>
             Generate Speech
           </Button>
-        )}
+        </div>
+      )}
 
-        <Button variant="danger" onClick={handleDeleteProfile}>
-          Delete Profile
+      <div className="flex flex-wrap gap-3">
+        <Button variant="danger" onClick={() => setShowDeleteProfile(true)}>
+          Delete Voice Profile
         </Button>
       </div>
 
-      {/* Delete sample modal */}
-      <Modal
+      {/* Delete sample confirmation */}
+      <ConfirmationDialog
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="Delete Sample"
-        description={`Delete "${deleteTarget?.filename}"? This cannot be undone.`}
-        size="sm"
-      >
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(null)}>Cancel</Button>
-          <Button variant="danger" size="sm" isLoading={isDeletingSample} onClick={handleDeleteSample}>Delete</Button>
-        </div>
-      </Modal>
+        onConfirm={handleDeleteSample}
+        title="Delete Voice Sample"
+        description={`Delete "${deleteTarget?.filename}"? This removes the sample from this voice profile. This cannot be undone.`}
+        confirmLabel="Delete Sample"
+        isLoading={isDeletingSample}
+      />
+
+      {/* Delete profile confirmation */}
+      <ConfirmationDialog
+        isOpen={showDeleteProfile}
+        onClose={() => setShowDeleteProfile(false)}
+        onConfirm={handleDeleteProfile}
+        title="Delete Voice Profile"
+        description={`Delete "${profile.name}" and all ${profile.samples.length} sample${profile.samples.length !== 1 ? "s" : ""}? This will permanently remove all voice data and cannot be undone.`}
+        confirmLabel="Delete Profile"
+        isLoading={isDeletingProfile}
+      />
 
       <NotificationContainer notifications={notifications} onDismiss={removeNotification} />
     </div>
