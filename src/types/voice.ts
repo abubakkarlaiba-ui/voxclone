@@ -18,6 +18,7 @@ export type VoiceProfileStatus =
 
 export interface VoiceProfile {
   id: string;
+  userId: string;
   name: string;
   description: string;
   status: VoiceProfileStatus;
@@ -99,6 +100,7 @@ export interface ProviderCapabilities {
 
 export interface HistoryItem {
   id: string;
+  userId: string;
   voiceId: string;
   voiceName: string;
   text: string;

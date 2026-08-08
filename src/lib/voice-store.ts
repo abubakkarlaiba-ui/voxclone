@@ -8,8 +8,8 @@ import type { VoiceProfile } from "@/types";
  */
 const profiles: VoiceProfile[] = [];
 
-export function getAllProfiles(): VoiceProfile[] {
-  return profiles;
+export function getProfilesByUserId(userId: string): VoiceProfile[] {
+  return profiles.filter((p) => p.userId === userId);
 }
 
 export function getProfileById(id: string): VoiceProfile | undefined {

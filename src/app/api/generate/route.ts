@@ -3,11 +3,20 @@ import type { ApiResponse, GeneratedAudio, GenerateRequest } from "@/types";
 import { getProfileById } from "@/lib/voice-store";
 import { getVoiceProvider, VoiceProviderError } from "@/lib/voice-provider";
 import { MAX_TEXT_LENGTH, MIN_TEXT_LENGTH } from "@/lib/constants";
+import { getAuthenticatedUser } from "@/lib/api-auth";
 
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<GeneratedAudio>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { voiceId, text, options } = body as GenerateRequest;
 
@@ -45,6 +54,13 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },
         { status: 404 }
+      );
+    }
+
+    if (profile.userId !== user.userId) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Access denied" }, timestamp: new Date().toISOString() },
+        { status: 403 }
       );
     }
 

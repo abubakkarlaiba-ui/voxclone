@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ApiResponse, HistoryItem, HistoryListResult } from "@/types";
 import { getHistoryList, addHistoryItem, clearHistory } from "@/lib/history-store";
+import { getAuthenticatedUser } from "@/lib/api-auth";
 
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<HistoryListResult>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "10", 10)));
     const search = searchParams.get("search") || undefined;
     const voiceId = searchParams.get("voiceId") || undefined;
 
-    const result = getHistoryList({ page, pageSize, search, voiceId });
+    const result = getHistoryList(user.userId, { page, pageSize, search, voiceId });
 
     return NextResponse.json({
       success: true,
@@ -35,6 +44,14 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<HistoryItem>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { voiceId, voiceName, text, audioUrl, duration, format, options } = body as Partial<HistoryItem>;
 
@@ -51,6 +68,7 @@ export async function POST(
 
     const item: HistoryItem = {
       id: crypto.randomUUID(),
+      userId: user.userId,
       voiceId,
       voiceName,
       text,
@@ -80,9 +98,19 @@ export async function POST(
   }
 }
 
-export async function DELETE(): Promise<NextResponse<ApiResponse<null>>> {
+export async function DELETE(
+  request: NextRequest
+): Promise<NextResponse<ApiResponse<null>>> {
   try {
-    clearHistory();
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
+    clearHistory(user.userId);
     return NextResponse.json({
       success: true,
       data: null,

@@ -8,8 +8,8 @@ import type { HistoryItem, HistoryListParams, HistoryListResult } from "@/types"
  */
 const items: HistoryItem[] = [];
 
-export function getHistoryList(params: HistoryListParams): HistoryListResult {
-  let filtered = [...items];
+export function getHistoryList(userId: string, params: HistoryListParams): HistoryListResult {
+  let filtered = items.filter((item) => item.userId === userId);
 
   if (params.search) {
     const q = params.search.toLowerCase();
@@ -49,10 +49,10 @@ export function deleteHistoryItem(id: string): boolean {
   return true;
 }
 
-export function clearHistory(): void {
-  items.length = 0;
-}
-
-export function getUniqueVoiceIds(): string[] {
-  return [...new Set(items.map((item) => item.voiceId))];
+export function clearHistory(userId: string): void {
+  const toRemove = items.filter((item) => item.userId === userId);
+  for (const item of toRemove) {
+    const idx = items.indexOf(item);
+    if (idx !== -1) items.splice(idx, 1);
+  }
 }

@@ -2,12 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import type { ApiResponse, VoiceProfile } from "@/types";
 import { getProfileById, updateProfile } from "@/lib/voice-store";
 import { getVoiceProvider, VoiceProviderError } from "@/lib/voice-provider";
+import { getAuthenticatedUser } from "@/lib/api-auth";
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<VoiceProfile>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const profile = getProfileById(id);
 
@@ -15,6 +24,13 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },
         { status: 404 }
+      );
+    }
+
+    if (profile.userId !== user.userId) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Access denied" }, timestamp: new Date().toISOString() },
+        { status: 403 }
       );
     }
 

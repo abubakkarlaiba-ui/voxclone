@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ApiResponse, VoiceSample, AddSampleRequest } from "@/types";
 import { getProfileById } from "@/lib/voice-store";
+import { getAuthenticatedUser } from "@/lib/api-auth";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<VoiceSample[]>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const profile = getProfileById(id);
 
@@ -14,6 +23,13 @@ export async function GET(
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },
         { status: 404 }
+      );
+    }
+
+    if (profile.userId !== user.userId) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Access denied" }, timestamp: new Date().toISOString() },
+        { status: 403 }
       );
     }
 
@@ -35,6 +51,14 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<VoiceSample>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const profile = getProfileById(id);
 
@@ -42,6 +66,13 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },
         { status: 404 }
+      );
+    }
+
+    if (profile.userId !== user.userId) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Access denied" }, timestamp: new Date().toISOString() },
+        { status: 403 }
       );
     }
 
@@ -88,6 +119,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<null>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const profile = getProfileById(id);
 
@@ -95,6 +134,13 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },
         { status: 404 }
+      );
+    }
+
+    if (profile.userId !== user.userId) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Access denied" }, timestamp: new Date().toISOString() },
+        { status: 403 }
       );
     }
 

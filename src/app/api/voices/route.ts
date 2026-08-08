@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ApiResponse, VoiceProfile, CreateVoiceProfileRequest } from "@/types";
-import { getAllProfiles, addProfile } from "@/lib/voice-store";
+import { getProfilesByUserId, addProfile } from "@/lib/voice-store";
+import { getAuthenticatedUser } from "@/lib/api-auth";
 
-export async function GET(): Promise<NextResponse<ApiResponse<VoiceProfile[]>>> {
+export async function GET(
+  request: NextRequest
+): Promise<NextResponse<ApiResponse<VoiceProfile[]>>> {
   try {
-    const profiles = getAllProfiles();
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
+    const profiles = getProfilesByUserId(user.userId);
     return NextResponse.json({
       success: true,
       data: profiles,
@@ -22,6 +33,14 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<VoiceProfile>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { name, description } = body as CreateVoiceProfileRequest;
 
@@ -42,6 +61,7 @@ export async function POST(
     const now = new Date().toISOString();
     const profile: VoiceProfile = {
       id: crypto.randomUUID(),
+      userId: user.userId,
       name: name.trim(),
       description: description?.trim() || "",
       status: "draft",

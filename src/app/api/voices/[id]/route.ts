@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ApiResponse, VoiceProfile, UpdateVoiceProfileRequest } from "@/types";
 import { getProfileById, updateProfile, deleteProfile } from "@/lib/voice-store";
+import { getAuthenticatedUser } from "@/lib/api-auth";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<VoiceProfile>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const profile = getProfileById(id);
 
@@ -14,6 +23,13 @@ export async function GET(
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },
         { status: 404 }
+      );
+    }
+
+    if (profile.userId !== user.userId) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Access denied" }, timestamp: new Date().toISOString() },
+        { status: 403 }
       );
     }
 
@@ -35,6 +51,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<VoiceProfile>>> {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const profile = getProfileById(id);
 
@@ -42,6 +66,13 @@ export async function PATCH(
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },
         { status: 404 }
+      );
+    }
+
+    if (profile.userId !== user.userId) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Access denied" }, timestamp: new Date().toISOString() },
+        { status: 403 }
       );
     }
 
@@ -77,13 +108,36 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<null>>> {
   try {
-    const { id } = await params;
-    const deleted = deleteProfile(id);
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" }, timestamp: new Date().toISOString() },
+        { status: 401 }
+      );
+    }
 
+    const { id } = await params;
+    const profile = getProfileById(id);
+
+    if (!profile) {
+      return NextResponse.json(
+        { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },
+        { status: 404 }
+      );
+    }
+
+    if (profile.userId !== user.userId) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Access denied" }, timestamp: new Date().toISOString() },
+        { status: 403 }
+      );
+    }
+
+    const deleted = deleteProfile(id);
     if (!deleted) {
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },

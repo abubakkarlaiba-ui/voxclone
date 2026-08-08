@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ROUTES, APP_NAME } from "@/lib/constants";
-import { Button } from "@/components/ui/Button";
+import { UserMenu } from "@/components/layout/UserMenu";
 
 export function LandingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -37,11 +37,7 @@ export function LandingHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href={ROUTES.STUDIO}>
-            <Button variant="primary" size="sm">
-              Get Started
-            </Button>
-          </Link>
+          <UserMenu />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="rounded-lg p-2 text-text-secondary hover:bg-bg-elevated md:hidden"
