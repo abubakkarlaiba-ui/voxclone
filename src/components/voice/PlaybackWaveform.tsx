@@ -259,10 +259,10 @@ export function PlaybackWaveform({
       </div>
 
       {/* Transport + volume + download */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-2">
         <button
           onClick={handleReplay}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-bg-tertiary hover:text-text-primary sm:h-9 sm:w-9"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-bg-tertiary hover:text-text-primary"
           aria-label="Restart playback"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -272,15 +272,15 @@ export function PlaybackWaveform({
 
         <button
           onClick={togglePlay}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-primary text-white shadow-lg shadow-accent-primary/25 transition-all hover:bg-accent-primary/90 hover:shadow-accent-primary/30 sm:h-12 sm:w-12"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-primary text-white shadow-lg shadow-accent-primary/25 transition-all hover:bg-accent-primary/90 hover:shadow-accent-primary/30"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
-            <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
             </svg>
           ) : (
-            <svg className="ml-0.5 h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           )}
@@ -288,7 +288,7 @@ export function PlaybackWaveform({
 
         <div className="flex flex-1 items-center gap-2" />
 
-        <div className="hidden items-center gap-1.5 sm:flex">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={toggleMute}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-bg-tertiary hover:text-text-primary"
@@ -310,14 +310,6 @@ export function PlaybackWaveform({
             {Math.round(effectiveVolume * 100)}%
           </span>
         </div>
-
-        <button
-          onClick={toggleMute}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-bg-tertiary hover:text-text-primary sm:hidden"
-          aria-label={isMuted ? "Unmute" : "Mute"}
-        >
-          <VolumeIcon level={effectiveVolume} />
-        </button>
 
         <button
           onClick={handleDownload}

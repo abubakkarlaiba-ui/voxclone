@@ -128,7 +128,7 @@ export function VoiceProfileCard({
           <div className="mb-3 flex items-start justify-between">
             <div className="min-w-0 flex-1">
               {isEditing ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
                   <Input
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
@@ -142,21 +142,19 @@ export function VoiceProfileCard({
                     className="h-8 text-sm"
                     autoFocus
                   />
-                  <div className="flex gap-2">
-                    <Button size="xs" onClick={handleSaveName} isLoading={isSaving}>
-                      Save
-                    </Button>
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setEditName(profile.name);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
+                  <Button size="xs" onClick={handleSaveName} isLoading={isSaving}>
+                    Save
+                  </Button>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditName(profile.name);
+                    }}
+                  >
+                    Cancel
+                  </Button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -230,9 +228,9 @@ export function VoiceProfileCard({
           )}
 
           {/* Actions */}
-          <div className="mt-auto flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
+          <div className="mt-auto flex gap-2" onClick={(e) => e.stopPropagation()}>
             {isSelected ? (
-              <Button size="xs" disabled>
+              <Button size="sm" disabled>
                 <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                 </svg>
@@ -240,7 +238,7 @@ export function VoiceProfileCard({
               </Button>
             ) : (
               <Button
-                size="xs"
+                size="sm"
                 disabled={profile.status !== "ready"}
                 onClick={handleSelect}
               >
@@ -248,14 +246,14 @@ export function VoiceProfileCard({
               </Button>
             )}
             <Button
-              size="xs"
+              size="sm"
               variant="secondary"
               onClick={() => router.push(`/library/${profile.id}`)}
             >
               Details
             </Button>
             <Button
-              size="xs"
+              size="sm"
               variant="ghost"
               className="ml-auto text-text-muted hover:text-error"
               onClick={() => setShowDeleteConfirm(true)}

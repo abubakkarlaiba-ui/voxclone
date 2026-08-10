@@ -39,7 +39,7 @@ export function HistoryItemCard({ item, onDelete }: HistoryItemCardProps) {
     <>
       <Card variant="glass" className="group">
         <CardContent>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="flex items-start gap-4">
             {/* Icon */}
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-accent-primary/10">
               <svg className="h-5 w-5 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,13 +49,13 @@ export function HistoryItemCard({ item, onDelete }: HistoryItemCardProps) {
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <div className="mb-1.5 flex items-center gap-2">
                 <span className="text-xs font-medium text-text-primary">{item.voiceName}</span>
                 <span className="text-text-muted">&middot;</span>
                 <span className="text-[11px] text-text-muted">{timeAgo}</span>
               </div>
               <p className="mb-2 line-clamp-2 text-sm text-text-secondary italic">&quot;{item.text}&quot;</p>
-              <div className="flex flex-wrap items-center gap-3 text-[11px] text-text-muted">
+              <div className="flex items-center gap-3 text-[11px] text-text-muted">
                 <span className="flex items-center gap-1">
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -70,8 +70,8 @@ export function HistoryItemCard({ item, onDelete }: HistoryItemCardProps) {
             </div>
 
             {/* Player + actions */}
-            <div className="flex items-center gap-3 sm:flex-col sm:items-end sm:gap-2">
-              <div className="w-full flex-1 sm:w-56 sm:flex-shrink-0">
+            <div className="flex flex-col items-end gap-2">
+              <div className="w-56 flex-shrink-0">
                 <AudioPlayer
                   src={item.audioUrl}
                   compact
@@ -84,7 +84,7 @@ export function HistoryItemCard({ item, onDelete }: HistoryItemCardProps) {
                 size="xs"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={isDeleting}
-                className="text-text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:text-error sm:ml-0"
+                className="text-text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:text-error"
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

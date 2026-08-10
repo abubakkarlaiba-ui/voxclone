@@ -318,8 +318,8 @@ export default function VoiceProfileDetailPage() {
       {/* Profile Header */}
       <Card variant="glass" className="mb-6">
         <CardContent className="py-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
               {isEditing ? (
                 <div className="space-y-3">
                   <Input
@@ -368,7 +368,6 @@ export default function VoiceProfileDetailPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="sm:flex-shrink-0"
                 onClick={() => {
                   setEditName(profile.name);
                   setEditDescription(profile.description);
@@ -383,7 +382,7 @@ export default function VoiceProfileDetailPage() {
           </div>
 
           {/* Stats row */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
+          <div className="mt-4 flex items-center gap-4 text-xs text-text-muted">
             <span>{profile.samples.length} sample{profile.samples.length !== 1 ? "s" : ""}</span>
             <span className="h-1 w-1 rounded-full bg-border-primary" />
             <span>{formatDuration(profile.totalDuration)} total</span>
