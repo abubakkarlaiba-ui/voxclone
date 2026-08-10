@@ -120,16 +120,16 @@ export default function StudioPage() {
   // ---------- RENDER: SAVED SUCCESS ----------
   if (savedProfile) {
     return (
-      <div className="mx-auto max-w-xl py-8">
+      <div className="mx-auto max-w-xl py-8 page-enter">
         <Card variant="glass">
           <CardContent className="flex flex-col items-center py-14">
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-success/10 animate-scale-in">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-success/10 animate-check-pop">
               <svg className="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="mb-2 text-xl font-bold text-text-primary">Voice Saved</h2>
-            <p className="mb-8 text-center text-sm text-text-secondary">
+            <h2 className="mb-2 text-xl font-bold text-text-primary animate-fade-in-up">Voice Saved</h2>
+            <p className="mb-8 text-center text-sm text-text-secondary animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
               &quot;{savedProfile.name}&quot; has been saved. You can now use it for text-to-speech.
             </p>
             <div className="flex gap-3">
@@ -215,7 +215,7 @@ export default function StudioPage() {
   const progress = (recorder.duration / recorder.maxDuration) * 100;
 
   return (
-    <div className="mx-auto max-w-2xl py-8">
+    <div className="mx-auto max-w-2xl py-8 page-enter">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-text-primary">Voice Studio</h1>
