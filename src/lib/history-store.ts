@@ -1,12 +1,14 @@
 import type { HistoryItem, HistoryListParams, HistoryListResult } from "@/types";
 
 /**
- * Shared in-memory store for generation history.
+ * In-memory history store using globalThis for Vercel serverless persistence.
  *
- * IMPORTANT: This data is lost on server restart.
- * In production, replace with a real database.
+ * globalThis persists across warm invocations of the same serverless function.
+ * On cold starts, data is lost — in production, replace with a real database.
  */
-const items: HistoryItem[] = [];
+const g = globalThis as typeof globalThis & { __voxcloneHistory?: HistoryItem[] };
+if (!g.__voxcloneHistory) g.__voxcloneHistory = [];
+const items = g.__voxcloneHistory;
 
 export function getHistoryList(userId: string, params: HistoryListParams): HistoryListResult {
   let filtered = items.filter((item) => item.userId === userId);

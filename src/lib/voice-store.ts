@@ -1,12 +1,14 @@
 import type { VoiceProfile } from "@/types";
 
 /**
- * Shared in-memory store for development.
+ * In-memory voice profile store using globalThis for Vercel serverless persistence.
  *
- * IMPORTANT: This data is lost on server restart.
- * In production, replace with a real database.
+ * globalThis persists across warm invocations of the same serverless function.
+ * On cold starts, data is lost — in production, replace with a real database.
  */
-const profiles: VoiceProfile[] = [];
+const g = globalThis as typeof globalThis & { __voxcloneProfiles?: VoiceProfile[] };
+if (!g.__voxcloneProfiles) g.__voxcloneProfiles = [];
+const profiles = g.__voxcloneProfiles;
 
 export function getProfilesByUserId(userId: string): VoiceProfile[] {
   return profiles.filter((p) => p.userId === userId);

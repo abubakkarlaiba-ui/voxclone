@@ -1,7 +1,8 @@
 /**
- * Simple in-memory rate limiter for API routes.
+ * Simple in-memory rate limiter using globalThis for Vercel serverless persistence.
  *
  * Tracks request counts per key (e.g., IP address) within a sliding window.
+ * globalThis persists across warm invocations of the same serverless function.
  * In production, replace with Redis-backed rate limiting.
  */
 
@@ -10,16 +11,19 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
-const store = new Map<string, RateLimitEntry>();
+const g = globalThis as typeof globalThis & { __voxcloneRateLimit?: Map<string, RateLimitEntry> };
+if (!g.__voxcloneRateLimit) g.__voxcloneRateLimit = new Map();
+const store = g.__voxcloneRateLimit;
 
 const CLEANUP_INTERVAL = 60_000;
 
-let lastCleanup = Date.now();
+const gCleanup = globalThis as typeof globalThis & { __voxcloneRateLimitLastCleanup?: number };
+if (!gCleanup.__voxcloneRateLimitLastCleanup) gCleanup.__voxcloneRateLimitLastCleanup = 0;
 
 function cleanup() {
   const now = Date.now();
-  if (now - lastCleanup < CLEANUP_INTERVAL) return;
-  lastCleanup = now;
+  if (now - gCleanup.__voxcloneRateLimitLastCleanup! < CLEANUP_INTERVAL) return;
+  gCleanup.__voxcloneRateLimitLastCleanup = now;
   for (const [key, entry] of store) {
     if (entry.resetAt <= now) store.delete(key);
   }
