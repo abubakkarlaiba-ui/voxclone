@@ -87,6 +87,7 @@
 html {
   background: var(--bg-primary);
   color-scheme: dark;
+  scroll-padding-top: 4rem;
 }
 
 body {
@@ -95,6 +96,14 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .MobileNavBottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 ::selection {

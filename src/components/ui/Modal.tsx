@@ -48,14 +48,14 @@ export function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
       <div
         className={cn(
-          "relative z-10 w-full animate-scale-in rounded-2xl border border-border-primary bg-bg-secondary p-6 shadow-2xl",
+          "relative z-10 w-full animate-scale-in rounded-2xl border border-border-primary bg-bg-secondary shadow-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6",
           sizeStyles[size]
         )}
         role="dialog"
