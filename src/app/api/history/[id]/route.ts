@@ -46,11 +46,11 @@ export async function DELETE(
       data: null,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error: { code: "DELETE_ERROR", message: error instanceof Error ? error.message : "Failed to delete history item" },
+        error: { code: "DELETE_ERROR", message: "Failed to delete history item" },
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

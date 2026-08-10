@@ -1,6 +1,6 @@
 import type { UserPublic } from "@/types/user";
 
-const SESSION_SECRET = "voxclone-dev-secret-change-in-production";
+const SESSION_SECRET = process.env.SESSION_SECRET || "voxclone-dev-secret-change-in-production";
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60;
 
 function toBase64Url(bytes: Uint8Array): string {

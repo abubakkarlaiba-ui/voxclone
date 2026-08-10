@@ -3,11 +3,30 @@ import type { ApiResponse } from "@/types";
 import type { UserPublic } from "@/types/user";
 import { verifyPassword, createSessionToken, setSessionCookie } from "@/lib/auth";
 import { getUserByEmail } from "@/lib/user-store";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
+
+const LOGIN_RATE_LIMIT = { windowMs: 15 * 60 * 1000, maxRequests: 10 };
+
+function getClientIp(request: NextRequest): string {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || request.headers.get("x-real-ip")
+    || "unknown";
+}
 
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<UserPublic>>> {
   try {
+    const ip = getClientIp(request);
+    const rateLimit = checkRateLimit(`login:${ip}`, LOGIN_RATE_LIMIT);
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: { code: "RATE_LIMITED", message: "Too many login attempts. Please try again later." }, timestamp: new Date().toISOString() },
+        { status: 429, headers: getRateLimitHeaders(rateLimit) }
+      );
+    }
+
     const body = await request.json();
     const { email, password } = body as { email?: string; password?: string };
 

@@ -53,7 +53,7 @@ export async function POST(
     if (!provider.isConfigured()) {
       updateProfile(id, {
         status: "failed",
-        errorMessage: "Voice API not configured. Set ELEVENLABS_API_KEY in .env.local.",
+        errorMessage: "Voice API not configured.",
       });
 
       return NextResponse.json(
@@ -61,7 +61,7 @@ export async function POST(
           success: false,
           error: {
             code: "CONFIGURATION_ERROR",
-            message: "Voice generation service not configured. Set ELEVENLABS_API_KEY environment variable.",
+            message: "Voice generation service is not configured. Please contact support.",
           },
           timestamp: new Date().toISOString(),
         },
@@ -131,24 +131,21 @@ export async function POST(
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      let errorMessage = "Voice processing failed";
-
-      if (error instanceof VoiceProviderError) {
-        errorMessage = error.message;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const isProviderError = error instanceof VoiceProviderError;
+      const errorMessage = isProviderError
+        ? "Voice processing failed. Please try again later."
+        : "Voice processing failed. Please try again later.";
 
       updateProfile(id, {
         status: "failed",
-        errorMessage,
+        errorMessage: "Voice processing failed.",
       });
 
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: "PROCESSING_ERROR",
+            code: isProviderError ? error.code : "PROCESSING_ERROR",
             message: errorMessage,
           },
           timestamp: new Date().toISOString(),

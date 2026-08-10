@@ -58,6 +58,13 @@ export async function POST(
       );
     }
 
+    if (description && typeof description === "string" && description.length > 500) {
+      return NextResponse.json(
+        { success: false, error: { code: "VALIDATION_ERROR", message: "Description must be 500 characters or less" }, timestamp: new Date().toISOString() },
+        { status: 400 }
+      );
+    }
+
     const now = new Date().toISOString();
     const profile: VoiceProfile = {
       id: crypto.randomUUID(),

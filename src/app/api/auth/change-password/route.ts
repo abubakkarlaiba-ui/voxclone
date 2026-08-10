@@ -40,6 +40,13 @@ export async function POST(
       );
     }
 
+    if (newPassword.length > 128) {
+      return NextResponse.json(
+        { success: false, error: { code: "VALIDATION_ERROR", message: "New password must be 128 characters or less" }, timestamp: new Date().toISOString() },
+        { status: 400 }
+      );
+    }
+
     const user = getUserById(session.userId);
     if (!user) {
       return NextResponse.json(

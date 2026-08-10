@@ -86,6 +86,19 @@ export async function PATCH(
           { status: 400 }
         );
       }
+      if (name.trim().length > 100) {
+        return NextResponse.json(
+          { success: false, error: { code: "VALIDATION_ERROR", message: "Name must be 100 characters or less" }, timestamp: new Date().toISOString() },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (description !== undefined && typeof description === "string" && description.length > 500) {
+      return NextResponse.json(
+        { success: false, error: { code: "VALIDATION_ERROR", message: "Description must be 500 characters or less" }, timestamp: new Date().toISOString() },
+        { status: 400 }
+      );
     }
 
     const updates: Partial<VoiceProfile> = {};

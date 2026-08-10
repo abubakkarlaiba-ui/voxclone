@@ -28,11 +28,11 @@ export async function GET(
       data: result,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error: { code: "FETCH_ERROR", message: error instanceof Error ? error.message : "Failed to fetch history" },
+        error: { code: "FETCH_ERROR", message: "Failed to fetch history" },
         timestamp: new Date().toISOString(),
       },
       { status: 500 }
@@ -66,14 +66,28 @@ export async function POST(
       );
     }
 
+    if (typeof text !== "string" || text.length > 10000) {
+      return NextResponse.json(
+        { success: false, error: { code: "VALIDATION_ERROR", message: "Invalid text" }, timestamp: new Date().toISOString() },
+        { status: 400 }
+      );
+    }
+
+    if (typeof audioUrl !== "string" || !audioUrl.startsWith("data:")) {
+      return NextResponse.json(
+        { success: false, error: { code: "VALIDATION_ERROR", message: "Invalid audio data" }, timestamp: new Date().toISOString() },
+        { status: 400 }
+      );
+    }
+
     const item: HistoryItem = {
       id: crypto.randomUUID(),
       userId: user.userId,
       voiceId,
-      voiceName,
-      text,
+      voiceName: String(voiceName).slice(0, 100),
+      text: text.slice(0, 10000),
       audioUrl,
-      duration: duration ?? 0,
+      duration: typeof duration === "number" ? Math.max(0, Math.min(duration, 600)) : 0,
       format: format ?? "mp3",
       options: options ?? {},
       createdAt: new Date().toISOString(),
@@ -86,11 +100,11 @@ export async function POST(
       data: item,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error: { code: "CREATE_ERROR", message: error instanceof Error ? error.message : "Failed to create history item" },
+        error: { code: "CREATE_ERROR", message: "Failed to create history item" },
         timestamp: new Date().toISOString(),
       },
       { status: 500 }
@@ -116,11 +130,11 @@ export async function DELETE(
       data: null,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error: { code: "DELETE_ERROR", message: error instanceof Error ? error.message : "Failed to clear history" },
+        error: { code: "DELETE_ERROR", message: "Failed to clear history" },
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

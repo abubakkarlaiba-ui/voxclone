@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ApiResponse, GeneratedAudio, GenerateRequest } from "@/types";
 import { getProfileById } from "@/lib/voice-store";
-import { getVoiceProvider, VoiceProviderError } from "@/lib/voice-provider";
+import { getVoiceProvider } from "@/lib/voice-provider";
 import { MAX_TEXT_LENGTH, MIN_TEXT_LENGTH } from "@/lib/constants";
 import { getAuthenticatedUser } from "@/lib/api-auth";
 
@@ -86,7 +86,7 @@ export async function POST(
           success: false,
           error: {
             code: "CONFIGURATION_ERROR",
-            message: "Voice generation service not configured. Set ELEVENLABS_API_KEY environment variable.",
+            message: "Voice generation service is not configured. Please contact support.",
           },
           timestamp: new Date().toISOString(),
         },
@@ -140,21 +140,11 @@ export async function POST(
       data: generated,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
-    let errorMessage = "Speech generation failed";
-    let errorCode = "GENERATION_ERROR";
-
-    if (error instanceof VoiceProviderError) {
-      errorMessage = error.message;
-      errorCode = error.code;
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error: { code: errorCode, message: errorMessage },
+        error: { code: "GENERATION_ERROR", message: "Speech generation failed. Please try again later." },
         timestamp: new Date().toISOString(),
       },
       { status: 500 }
