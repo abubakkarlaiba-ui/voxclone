@@ -5,7 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/lib/constants";
 import { Logo } from "./Logo";
-import { USER_PLACEHOLDER } from "@/lib/constants";
+import { useUser } from "@/hooks";
 
 const iconMap: Record<string, React.ReactNode> = {
   microphone: (
@@ -43,6 +43,11 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useUser();
+
+  const userName = user?.name || "User";
+  const userEmail = user?.email || "";
+  const initials = userName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
     <>
@@ -98,11 +103,11 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         <div className="border-t border-border-primary p-4">
           <div className="flex items-center gap-3 rounded-xl px-3 py-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 text-sm font-semibold text-accent-primary">
-              {USER_PLACEHOLDER.name.split(" ").map((n) => n[0]).join("")}
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="truncate text-sm font-medium text-text-primary">{USER_PLACEHOLDER.name}</p>
-              <p className="truncate text-xs text-text-muted">{USER_PLACEHOLDER.email}</p>
+              <p className="truncate text-sm font-medium text-text-primary">{userName}</p>
+              <p className="truncate text-xs text-text-muted">{userEmail}</p>
             </div>
           </div>
         </div>
