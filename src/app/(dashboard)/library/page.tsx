@@ -78,8 +78,8 @@ export default function LibraryPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Voice Library</h1>
-          <p className="mt-1 text-sm text-text-secondary">
+          <h1 className="text-2xl font-bold text-white">Voice Library</h1>
+          <p className="mt-1 text-sm text-[#8b8fa3]">
             Manage your voice profiles and samples.
           </p>
         </div>
@@ -122,15 +122,15 @@ export default function LibraryPage() {
         <>
           {/* Stats + Search */}
           <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-xs text-text-muted">
+            <div className="flex items-center gap-2 text-xs text-[#5c6073]">
               <span>{profiles.length} voice{profiles.length !== 1 ? "s" : ""}</span>
-              <span className="h-1 w-1 rounded-full bg-border-primary" />
+              <span className="h-1 w-1 rounded-full border-white/[0.08]" />
               <span>{readyCount} ready</span>
-              <span className="h-1 w-1 rounded-full bg-border-primary" />
+              <span className="h-1 w-1 rounded-full border-white/[0.08]" />
               <span>{totalSamples} total sample{totalSamples !== 1 ? "s" : ""}</span>
             </div>
             <div className="relative max-w-xs">
-              <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5c6073]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
@@ -138,7 +138,7 @@ export default function LibraryPage() {
                 placeholder="Search voices..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-border-primary bg-bg-tertiary py-2 pl-10 pr-4 text-sm text-text-primary placeholder-text-muted transition-colors hover:border-border-secondary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/10"
+                className="w-full rounded-xl border border-white/[0.08] bg-[#12141d] py-2 pl-10 pr-4 text-sm text-white placeholder-[#5c6073] transition-colors hover:border-white/[0.1] focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/10"
               />
             </div>
           </div>

@@ -22,26 +22,26 @@ import type { VoiceProfile, VoiceSample, VoiceProfileStatus } from "@/types";
 const statusConfig: Record<VoiceProfileStatus, { label: string; className: string; dotClassName: string; description: string }> = {
   draft: {
     label: "Draft",
-    className: "bg-text-muted/10 text-text-muted border-border-primary",
-    dotClassName: "bg-text-muted",
+    className: "bg-[#5c6073]/10 text-[#5c6073] border-white/[0.08]",
+    dotClassName: "bg-[#5c6073]",
     description: "Add voice samples and then process to create your AI voice.",
   },
   processing: {
     label: "Processing",
-    className: "bg-warning/10 text-warning border-warning/20",
-    dotClassName: "bg-warning animate-pulse-soft",
+    className: "bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/20",
+    dotClassName: "bg-[#f59e0b] animate-pulse-soft",
     description: "Your voice samples are being analyzed by AI. This may take a few minutes.",
   },
   ready: {
     label: "Ready",
-    className: "bg-success/10 text-success border-success/20",
-    dotClassName: "bg-success",
+    className: "bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20",
+    dotClassName: "bg-[#22c55e]",
     description: "Your AI voice is ready! Use it to generate speech from text.",
   },
   failed: {
     label: "Failed",
-    className: "bg-error/10 text-error border-error/20",
-    dotClassName: "bg-error",
+    className: "bg-[#ef4444]/10 text-[#ef4444] border-[#ef4444]/20",
+    dotClassName: "bg-[#ef4444]",
     description: "Processing failed. Try re-processing or add more samples.",
   },
 };
@@ -307,7 +307,7 @@ export default function VoiceProfileDetailPage() {
       {/* Back button */}
       <button
         onClick={() => router.push("/library")}
-        className="mb-6 flex items-center gap-1.5 text-sm text-text-secondary transition-colors hover:text-text-primary"
+        className="mb-6 flex items-center gap-1.5 text-sm text-[#8b8fa3] transition-colors hover:text-white"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -316,7 +316,7 @@ export default function VoiceProfileDetailPage() {
       </button>
 
       {/* Profile Header */}
-      <Card variant="glass" className="mb-6">
+      <Card className="eleven-card mb-6">
         <CardContent className="py-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -345,7 +345,7 @@ export default function VoiceProfileDetailPage() {
               ) : (
                 <>
                   <div className="flex items-center gap-3 mb-1">
-                    <h1 className="text-xl font-bold text-text-primary">{profile.name}</h1>
+                    <h1 className="text-xl font-bold text-white">{profile.name}</h1>
                     <span
                       className={cn(
                         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
@@ -357,9 +357,9 @@ export default function VoiceProfileDetailPage() {
                     </span>
                   </div>
                   {profile.description && (
-                    <p className="text-sm text-text-secondary">{profile.description}</p>
+                    <p className="text-sm text-[#8b8fa3]">{profile.description}</p>
                   )}
-                  <p className="mt-2 text-xs text-text-muted">{status.description}</p>
+                  <p className="mt-2 text-xs text-[#5c6073]">{status.description}</p>
                 </>
               )}
             </div>
@@ -382,15 +382,15 @@ export default function VoiceProfileDetailPage() {
           </div>
 
           {/* Stats row */}
-          <div className="mt-4 flex items-center gap-4 text-xs text-text-muted">
+          <div className="mt-4 flex items-center gap-4 text-xs text-[#5c6073]">
             <span>{profile.samples.length} sample{profile.samples.length !== 1 ? "s" : ""}</span>
-            <span className="h-1 w-1 rounded-full bg-border-primary" />
+            <span className="h-1 w-1 rounded-full border-white/[0.08]" />
             <span>{formatDuration(profile.totalDuration)} total</span>
-            <span className="h-1 w-1 rounded-full bg-border-primary" />
+            <span className="h-1 w-1 rounded-full border-white/[0.08]" />
             <span>Created {new Date(profile.createdAt).toLocaleDateString()}</span>
             {profile.processedAt && (
               <>
-                <span className="h-1 w-1 rounded-full bg-border-primary" />
+                <span className="h-1 w-1 rounded-full border-white/[0.08]" />
                 <span>Processed {new Date(profile.processedAt).toLocaleDateString()}</span>
               </>
             )}
@@ -398,20 +398,20 @@ export default function VoiceProfileDetailPage() {
 
           {/* Error banner */}
           {profile.status === "failed" && profile.errorMessage && (
-            <div className="mt-4 rounded-lg bg-error/5 border border-error/10 px-4 py-3">
-              <p className="text-sm text-error">{profile.errorMessage}</p>
+            <div className="mt-4 rounded-lg bg-[#ef4444]/5 border border-[#ef4444]/10 px-4 py-3">
+              <p className="text-sm text-[#ef4444]">{profile.errorMessage}</p>
             </div>
           )}
 
           {/* Processing banner */}
           {profile.status === "processing" && (
-            <div className="mt-4 rounded-lg bg-warning/5 border border-warning/10 px-4 py-3">
+            <div className="mt-4 rounded-lg bg-[#f59e0b]/5 border border-[#f59e0b]/10 px-4 py-3">
               <div className="flex items-center gap-2">
-                <svg className="h-4 w-4 animate-spin text-warning" fill="none" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 animate-spin text-[#f59e0b]" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                <p className="text-sm text-warning">AI voice training in progress...</p>
+                <p className="text-sm text-[#f59e0b]">AI voice training in progress...</p>
               </div>
             </div>
           )}
@@ -419,7 +419,7 @@ export default function VoiceProfileDetailPage() {
       </Card>
 
       {/* Samples Section */}
-      <Card variant="glass" className="mb-6">
+      <Card className="eleven-card mb-6">
         <CardHeader>
           <div className="flex-1">
             <CardTitle>Voice Samples</CardTitle>
@@ -443,12 +443,12 @@ export default function VoiceProfileDetailPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-border-primary bg-bg-tertiary/50 py-8 text-center">
-              <svg className="mx-auto mb-3 h-8 w-8 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="rounded-xl border border-dashed border-white/[0.08] bg-[#12141d]/50 py-8 text-center">
+              <svg className="mx-auto mb-3 h-8 w-8 text-[#5c6073]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
               </svg>
-              <p className="text-sm text-text-secondary">No samples yet</p>
-              <p className="mt-1 text-xs text-text-muted">Record or upload your first voice sample.</p>
+              <p className="text-sm text-[#8b8fa3]">No samples yet</p>
+              <p className="mt-1 text-xs text-[#5c6073]">Record or upload your first voice sample.</p>
             </div>
           )}
 
@@ -478,12 +478,12 @@ export default function VoiceProfileDetailPage() {
 
           {/* Inline recorder */}
           {showRecordPanel && canAddSamples && (
-            <Card variant="elevated" className="animate-fade-in-up">
+            <Card className="eleven-card animate-fade-in-up">
               <CardContent className="py-6">
                 <div className="flex flex-col items-center">
                   {recorder.permission !== "granted" && recorder.state === "idle" && (
                     <div className="mb-4 text-center">
-                      <p className="text-sm text-text-secondary mb-3">Allow microphone to record a sample</p>
+                      <p className="text-sm text-[#8b8fa3] mb-3">Allow microphone to record a sample</p>
                       <Button onClick={() => recorder.requestPermission()} size="sm">
                         Enable Microphone
                       </Button>
@@ -502,10 +502,10 @@ export default function VoiceProfileDetailPage() {
                   {(recorder.state === "recording" || recorder.state === "paused") && (
                     <div className="w-full">
                       <div className="mb-3 flex items-center justify-center gap-4">
-                        <span className={cn("text-xs font-medium", recorder.state === "recording" ? "text-error" : "text-warning")}>
+                        <span className={cn("text-xs font-medium", recorder.state === "recording" ? "text-[#ef4444]" : "text-[#f59e0b]")}>
                           {recorder.state === "recording" ? "Recording" : "Paused"}
                         </span>
-                        <span className="text-lg font-bold tabular-nums text-text-primary">
+                        <span className="text-lg font-bold tabular-nums text-white">
                           {formatDuration(recorder.duration)}
                         </span>
                       </div>
@@ -529,7 +529,7 @@ export default function VoiceProfileDetailPage() {
 
                   {recorder.state === "stopped" && recorder.recording && (
                     <div className="w-full text-center">
-                      <p className="mb-2 text-sm text-text-secondary">
+                      <p className="mb-2 text-sm text-[#8b8fa3]">
                         {formatDuration(recorder.recording.duration)} recorded
                       </p>
                       <div className="mb-4 flex justify-center gap-2">
@@ -551,7 +551,7 @@ export default function VoiceProfileDetailPage() {
 
       {/* Actions */}
       {canProcess && (
-        <Card variant="glass" className="mb-6">
+        <Card className="eleven-card mb-6">
           <CardContent className="py-6">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center">
@@ -560,14 +560,14 @@ export default function VoiceProfileDetailPage() {
                   id="process-consent"
                   checked={processConsent}
                   onChange={(e) => setProcessConsent(e.target.checked)}
-                  className="h-4 w-4 rounded border-border-primary bg-bg-primary text-accent-primary focus:ring-accent-primary/20"
+                  className="h-4 w-4 rounded border-white/[0.08] bg-[#090a0f] text-[#6366f1] focus:ring-[#6366f1]/20"
                 />
               </div>
-              <label htmlFor="process-consent" className="text-sm leading-relaxed text-text-secondary cursor-pointer">
-                I confirm that this voice <span className="font-medium text-text-primary">belongs to me</span>, or I have{" "}
-                <span className="font-medium text-text-primary">explicit permission</span> from the voice owner to clone it.
+              <label htmlFor="process-consent" className="text-sm leading-relaxed text-[#8b8fa3] cursor-pointer">
+                I confirm that this voice <span className="font-medium text-white">belongs to me</span>, or I have{" "}
+                <span className="font-medium text-white">explicit permission</span> from the voice owner to clone it.
                 I understand that impersonating people without permission is prohibited.{" "}
-                <Link href={ROUTES.TERMS} target="_blank" className="text-accent-primary hover:underline">
+                <Link href={ROUTES.TERMS} target="_blank" className="text-[#818cf8] hover:underline">
                   View Terms
                 </Link>
               </label>

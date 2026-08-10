@@ -12,7 +12,7 @@ interface LogoProps {
 export function Logo({ collapsed = false, className }: LogoProps) {
   return (
     <Link href={ROUTES.HOME} className={cn("flex items-center gap-2.5", className)}>
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent-primary to-accent-secondary shadow-lg shadow-accent-primary/20">
+      <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] shadow-[0_0_20px_rgba(99,102,241,0.3)]">
         <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
@@ -23,7 +23,7 @@ export function Logo({ collapsed = false, className }: LogoProps) {
         </svg>
       </div>
       {!collapsed && (
-        <span className="text-lg font-bold tracking-tight text-text-primary">
+        <span className="text-lg font-bold tracking-tight text-white">
           {APP_NAME}
         </span>
       )}

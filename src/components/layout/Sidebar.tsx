@@ -53,19 +53,19 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     <>
       {isOpen && onClose && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border-primary/50 bg-bg-secondary/80 backdrop-blur-xl transition-transform duration-300",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-white/[0.06] bg-[#090a0f]/90 backdrop-blur-2xl transition-transform duration-300",
           "lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center border-b border-border-primary px-5">
+        <div className="flex h-16 items-center border-b border-white/[0.06] px-5">
           <Logo />
         </div>
 
@@ -81,14 +81,14 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   className={cn(
                     "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-accent-primary/10 text-accent-primary shadow-[inset_0_0_20px_rgba(99,102,241,0.06)]"
-                      : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
+                      ? "bg-[#6366f1]/10 text-[#818cf8] shadow-[inset_0_0_20px_rgba(99,102,241,0.06)]"
+                      : "text-[#8b8fa3] hover:bg-white/[0.05] hover:text-white"
                   )}
                 >
                   <span
                     className={cn(
                       "flex-shrink-0 transition-colors",
-                      isActive ? "text-accent-primary" : "text-text-muted group-hover:text-text-secondary"
+                      isActive ? "text-[#818cf8]" : "text-[#5c6073] group-hover:text-[#8b8fa3]"
                     )}
                   >
                     {iconMap[item.icon]}
@@ -100,22 +100,22 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           </div>
         </nav>
 
-        <div className="border-t border-border-primary p-4">
+        <div className="border-t border-white/[0.06] p-4">
           <div className="flex items-center gap-3 rounded-xl px-3 py-2">
             {user?.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={userName}
-                className="h-9 w-9 rounded-full object-cover ring-1 ring-border-primary"
+                className="h-9 w-9 rounded-full object-cover ring-1 ring-white/[0.1]"
               />
             ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 text-sm font-semibold text-accent-primary">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 text-sm font-semibold text-[#818cf8]">
                 {initials}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="truncate text-sm font-medium text-text-primary">{userName}</p>
-              <p className="truncate text-xs text-text-muted">{userEmail}</p>
+              <p className="truncate text-sm font-medium text-white">{userName}</p>
+              <p className="truncate text-xs text-[#5c6073]">{userEmail}</p>
             </div>
           </div>
         </div>

@@ -104,13 +104,13 @@ export default function HistoryPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Generation History</h1>
-          <p className="mt-1 text-sm text-text-secondary">
+          <h1 className="text-2xl font-bold text-white">Generation History</h1>
+          <p className="mt-1 text-sm text-[#8b8fa3]">
             View and manage your past speech generations.
           </p>
         </div>
         {data && data.total > 0 && (
-          <Button variant="ghost" size="sm" onClick={() => setShowClearAllConfirm(true)} className="text-text-muted hover:text-error">
+          <Button variant="ghost" size="sm" onClick={() => setShowClearAllConfirm(true)} className="text-[#5c6073] hover:text-[#ef4444]">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -123,14 +123,14 @@ export default function HistoryPage() {
       {data && data.total > 0 && (
         <div className="mb-6">
           <div className="relative max-w-md">
-            <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5c6073]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               type="text"
               placeholder="Search by text or voice name..."
               onChange={handleSearchChange}
-              className="w-full rounded-xl border border-border-primary bg-bg-tertiary py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder-text-muted transition-colors hover:border-border-secondary focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/10"
+              className="w-full rounded-xl border border-white/[0.08] bg-[#12141d] py-2.5 pl-10 pr-4 text-sm text-white placeholder-[#5c6073] transition-colors hover:border-white/[0.1] focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/10"
             />
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function HistoryPage() {
       {/* Results */}
       {!isLoading && !error && data && data.items.length > 0 && (
         <>
-          <p className="mb-4 text-xs text-text-muted">
+          <p className="mb-4 text-xs text-[#5c6073]">
             {data.total} generation{data.total !== 1 ? "s" : ""}
           </p>
           <div className="space-y-3">
@@ -202,7 +202,7 @@ export default function HistoryPage() {
               >
                 Previous
               </Button>
-              <span className="px-3 text-sm text-text-secondary">
+              <span className="px-3 text-sm text-[#8b8fa3]">
                 Page {page} of {totalPages}
               </span>
               <Button

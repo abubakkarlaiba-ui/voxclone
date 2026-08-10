@@ -179,12 +179,12 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-text-primary">Profile & Settings</h1>
-        <p className="mt-1 text-sm text-text-secondary">Manage your account settings.</p>
+        <h1 className="text-2xl font-bold text-white">Profile & Settings</h1>
+        <p className="mt-1 text-sm text-[#8b8fa3]">Manage your account settings.</p>
       </div>
 
       {/* Profile Photo Card */}
-      <Card variant="glass" className="mb-6">
+      <Card className="eleven-card mb-6">
         <CardHeader>
           <CardTitle>Profile Photo</CardTitle>
           <CardDescription>Your profile picture visible across the app.</CardDescription>
@@ -196,10 +196,10 @@ export default function SettingsPage() {
                 <img
                   src={user.avatarUrl}
                   alt={user.name}
-                  className="h-20 w-20 rounded-full object-cover ring-2 ring-border-primary"
+                  className="h-20 w-20 rounded-full object-cover ring-2 border-white/[0.08]"
                 />
               ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 text-2xl font-bold text-accent-primary ring-2 ring-border-primary">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 text-2xl font-bold text-[#818cf8] ring-2 border-white/[0.08]">
                   {initials}
                 </div>
               )}
@@ -233,20 +233,20 @@ export default function SettingsPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-text-muted hover:text-error"
+                  className="text-[#5c6073] hover:text-[#ef4444]"
                   onClick={handleRemoveAvatar}
                 >
                   Remove Photo
                 </Button>
               )}
-              <p className="text-[11px] text-text-muted">JPEG, PNG, WebP, or GIF. Max 2MB.</p>
+              <p className="text-[11px] text-[#5c6073]">JPEG, PNG, WebP, or GIF. Max 2MB.</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Profile Card */}
-      <Card variant="glass" className="mb-6">
+      <Card className="eleven-card mb-6">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -300,16 +300,16 @@ export default function SettingsPage() {
           ) : (
             <div className="space-y-2">
               <div>
-                <p className="text-xs text-text-muted">Name</p>
-                <p className="text-sm font-medium text-text-primary">{user.name}</p>
+                <p className="text-xs text-[#5c6073]">Name</p>
+                <p className="text-sm font-medium text-white">{user.name}</p>
               </div>
               <div>
-                <p className="text-xs text-text-muted">Email</p>
-                <p className="text-sm font-medium text-text-primary">{user.email}</p>
+                <p className="text-xs text-[#5c6073]">Email</p>
+                <p className="text-sm font-medium text-white">{user.email}</p>
               </div>
               <div>
-                <p className="text-xs text-text-muted">Member since</p>
-                <p className="text-sm font-medium text-text-primary">{new Date(user.createdAt).toLocaleDateString()}</p>
+                <p className="text-xs text-[#5c6073]">Member since</p>
+                <p className="text-sm font-medium text-white">{new Date(user.createdAt).toLocaleDateString()}</p>
               </div>
             </div>
           )}
@@ -317,7 +317,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Change Password */}
-      <Card variant="glass" className="mb-6">
+      <Card className="eleven-card mb-6">
         <CardHeader>
           <CardTitle>Change Password</CardTitle>
           <CardDescription>Update your password to keep your account secure.</CardDescription>
@@ -356,12 +356,12 @@ export default function SettingsPage() {
       </Card>
 
       {/* Danger Zone */}
-      <Card variant="glass" className="border-error/20">
+      <Card className="eleven-card border-[#ef4444]/20">
         <CardContent className="py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-text-primary">Sign out</p>
-              <p className="text-xs text-text-muted">Sign out of your account on this device.</p>
+              <p className="text-sm font-medium text-white">Sign out</p>
+              <p className="text-xs text-[#5c6073]">Sign out of your account on this device.</p>
             </div>
             <Button variant="danger" size="sm" onClick={logout}>
               Sign Out

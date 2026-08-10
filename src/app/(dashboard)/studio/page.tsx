@@ -139,15 +139,15 @@ export default function StudioPage() {
   if (savedProfile) {
     return (
       <div className="mx-auto max-w-xl py-8">
-        <Card variant="glass">
+        <Card className="eleven-card">
           <CardContent className="flex flex-col items-center py-14">
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-success/10 animate-scale-in">
-              <svg className="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#22c55e]/10 animate-scale-in">
+              <svg className="h-8 w-8 text-[#22c55e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="mb-2 text-xl font-bold text-text-primary">Voice Saved</h2>
-            <p className="mb-8 text-center text-sm text-text-secondary">
+            <h2 className="mb-2 text-xl font-bold text-white">Voice Saved</h2>
+            <p className="mb-8 text-center text-sm text-[#8b8fa3]">
               &quot;{savedProfile.name}&quot; has been saved{savedProfile.status === "ready" ? " and processed" : ""}. {savedProfile.status === "ready" ? "You can now use it for text-to-speech." : "You can retry processing from the Library."}
             </p>
             <div className="flex gap-3">
@@ -174,18 +174,18 @@ export default function StudioPage() {
     return (
       <div className="mx-auto max-w-xl py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-text-primary">Voice Studio</h1>
-          <p className="mt-1 text-sm text-text-secondary">Record your voice to create an AI clone.</p>
+          <h1 className="text-2xl font-bold text-white">Voice Studio</h1>
+          <p className="mt-1 text-sm text-[#8b8fa3]">Record your voice to create an AI clone.</p>
         </div>
-        <Card variant="glass">
+        <Card className="eleven-card">
           <CardContent className="flex flex-col items-center py-14">
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-warning/10">
-              <svg className="h-8 w-8 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#f59e0b]/10">
+              <svg className="h-8 w-8 text-[#f59e0b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <h2 className="mb-2 text-lg font-semibold text-text-primary">Browser Not Supported</h2>
-            <p className="mb-6 max-w-sm text-center text-sm text-text-secondary">
+            <h2 className="mb-2 text-lg font-semibold text-white">Browser Not Supported</h2>
+            <p className="mb-6 max-w-sm text-center text-sm text-[#8b8fa3]">
               Your browser does not support audio recording. Please use a modern browser like
               Chrome, Firefox, Edge, or Safari to record your voice.
             </p>
@@ -205,18 +205,18 @@ export default function StudioPage() {
     return (
       <div className="mx-auto max-w-xl py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-text-primary">Voice Studio</h1>
-          <p className="mt-1 text-sm text-text-secondary">Record your voice to create an AI clone.</p>
+          <h1 className="text-2xl font-bold text-white">Voice Studio</h1>
+          <p className="mt-1 text-sm text-[#8b8fa3]">Record your voice to create an AI clone.</p>
         </div>
-        <Card variant="glass">
+        <Card className="eleven-card">
           <CardContent className="flex flex-col items-center py-14">
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
-              <svg className="h-8 w-8 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#ef4444]/10">
+              <svg className="h-8 w-8 text-[#ef4444]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
               </svg>
             </div>
-            <h2 className="mb-2 text-lg font-semibold text-text-primary">Microphone Access Denied</h2>
-            <p className="mb-6 max-w-sm text-center text-sm text-text-secondary">
+            <h2 className="mb-2 text-lg font-semibold text-white">Microphone Access Denied</h2>
+            <p className="mb-6 max-w-sm text-center text-sm text-[#8b8fa3]">
               Microphone permission was denied. To record your voice, please allow microphone
               access in your browser settings and refresh the page.
             </p>
@@ -242,25 +242,25 @@ export default function StudioPage() {
     <div className="mx-auto max-w-2xl py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-text-primary">Voice Studio</h1>
-        <p className="mt-1 text-sm text-text-secondary">
+        <h1 className="text-2xl font-bold text-white">Voice Studio</h1>
+        <p className="mt-1 text-sm text-[#8b8fa3]">
           Record a high-quality voice sample to create your AI voice clone.
         </p>
       </div>
 
       {/* Recording Card */}
-      <Card variant="glass" className="mb-6">
+      <Card className="eleven-card mb-6">
         <CardContent className="flex flex-col items-center py-10">
           {/* Permission request state */}
           {recorder.permission === "idle" && !hasInteracted && (
             <div className="mb-8 flex flex-col items-center text-center">
-              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-accent-primary/10">
-                <svg className="h-10 w-10 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#6366f1]/10">
+                <svg className="h-10 w-10 text-[#818cf8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-text-primary">Enable Microphone</h3>
-              <p className="mb-6 max-w-xs text-sm text-text-secondary">
+              <h3 className="mb-2 text-lg font-semibold text-white">Enable Microphone</h3>
+              <p className="mb-6 max-w-xs text-sm text-[#8b8fa3]">
                 We need access to your microphone to record your voice. Your audio stays in your browser.
               </p>
               <Button onClick={handleRequestPermission} size="lg">
@@ -272,14 +272,14 @@ export default function StudioPage() {
           {/* Requesting permission spinner */}
           {recorder.permission === "requesting" && (
             <div className="mb-8 flex flex-col items-center text-center">
-              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-accent-primary/10 animate-pulse-soft">
-                <svg className="h-10 w-10 text-accent-primary animate-spin" fill="none" viewBox="0 0 24 24">
+              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#6366f1]/10 animate-pulse-soft">
+                <svg className="h-10 w-10 text-[#818cf8] animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-text-primary">Requesting Access</h3>
-              <p className="text-sm text-text-secondary">
+              <h3 className="mb-2 text-lg font-semibold text-white">Requesting Access</h3>
+              <p className="text-sm text-[#8b8fa3]">
                 Please allow microphone access in the browser prompt...
               </p>
             </div>
@@ -291,13 +291,13 @@ export default function StudioPage() {
               {/* Timer ring */}
               <div className="relative mb-8 flex h-40 w-40 items-center justify-center">
                 <svg className="absolute h-40 w-40 -rotate-90" viewBox="0 0 160 160">
-                  <circle cx="80" cy="80" r="72" fill="none" stroke="currentColor" strokeWidth="3" className="text-border-primary" />
+                  <circle cx="80" cy="80" r="72" fill="none" stroke="currentColor" strokeWidth="3" className="border-white/[0.08]" />
                 </svg>
                 <div className="flex flex-col items-center">
-                  <svg className="mb-2 h-10 w-10 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="mb-2 h-10 w-10 text-[#5c6073]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                   </svg>
-                  <span className="text-xs text-text-muted">Ready</span>
+                  <span className="text-xs text-[#5c6073]">Ready</span>
                 </div>
               </div>
 
@@ -308,7 +308,7 @@ export default function StudioPage() {
                 Start Recording
               </Button>
 
-              <p className="mt-4 text-center text-xs text-text-muted">
+              <p className="mt-4 text-center text-xs text-[#5c6073]">
                 Minimum 3 seconds. Maximum {formatDuration(recorder.maxDuration)}.
               </p>
             </>
@@ -320,10 +320,10 @@ export default function StudioPage() {
               {/* Timer ring with progress */}
               <div className="relative mb-6 flex h-40 w-40 items-center justify-center">
                 <svg className="absolute h-40 w-40 -rotate-90" viewBox="0 0 160 160">
-                  <circle cx="80" cy="80" r="72" fill="none" stroke="currentColor" strokeWidth="3" className="text-border-primary" />
+                  <circle cx="80" cy="80" r="72" fill="none" stroke="currentColor" strokeWidth="3" className="border-white/[0.08]" />
                   <circle
                     cx="80" cy="80" r="72" fill="none" stroke="currentColor" strokeWidth="3"
-                    className={isPaused ? "text-warning" : "text-accent-primary"}
+                    className={isPaused ? "text-[#f59e0b]" : "text-[#818cf8]"}
                     strokeDasharray={`${(progress / 100) * 452.389} 452.389`}
                     strokeLinecap="round"
                     style={{ transition: "stroke-dasharray 0.3s ease" }}
@@ -333,19 +333,19 @@ export default function StudioPage() {
                   {/* Pulsing mic icon when recording */}
                   <div className={`mb-2 rounded-full p-2 ${isRecording ? "animate-recording-pulse" : ""}`}>
                     {isRecording ? (
-                      <svg className="h-8 w-8 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="h-8 w-8 text-[#ef4444]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                       </svg>
                     ) : (
-                      <svg className="h-8 w-8 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="h-8 w-8 text-[#f59e0b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     )}
                   </div>
-                  <span className="text-3xl font-bold tabular-nums text-text-primary">
+                  <span className="text-3xl font-bold tabular-nums text-white">
                     {formatDuration(recorder.duration)}
                   </span>
-                  <span className={`text-xs font-medium ${isRecording ? "text-error" : "text-warning"}`}>
+                  <span className={`text-xs font-medium ${isRecording ? "text-[#ef4444]" : "text-[#f59e0b]"}`}>
                     {isRecording ? "Recording" : "Paused"}
                   </span>
                 </div>
@@ -390,7 +390,7 @@ export default function StudioPage() {
                 </Button>
               </div>
 
-              <p className="mt-4 text-center text-xs text-text-muted">
+              <p className="mt-4 text-center text-xs text-[#5c6073]">
                 {isRecording
                   ? "Recording in progress. Click stop when done."
                   : "Recording paused. Resume or stop."}
@@ -402,14 +402,14 @@ export default function StudioPage() {
           {isStopped && recorder.recording && (
             <div className="w-full animate-fade-in-up">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-text-primary">Recording Complete</h3>
-                <span className="text-xs text-text-muted">
+                <h3 className="text-sm font-semibold text-white">Recording Complete</h3>
+                <span className="text-xs text-[#5c6073]">
                   {formatDuration(recorder.recording.duration)} &middot; {formatBytes(recorder.recording.blob.size)}
                 </span>
               </div>
 
               {/* Waveform snapshot */}
-              <div className="mb-4 rounded-xl bg-bg-tertiary p-4">
+              <div className="mb-4 rounded-xl bg-[#12141d] p-4">
                 <Waveform
                   data={recorder.waveform}
                   isRecording={false}
@@ -450,7 +450,7 @@ export default function StudioPage() {
                 <Button onClick={handleSaveAndRecordAnother} variant="outline" disabled={!voiceName.trim()}>
                   Save &amp; Record Another
                 </Button>
-                <Button onClick={handleDiscard} variant="ghost" className="text-error hover:text-error">
+                <Button onClick={handleDiscard} variant="ghost" className="text-[#ef4444] hover:text-[#ef4444]">
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
@@ -464,30 +464,30 @@ export default function StudioPage() {
 
       {/* Tips */}
       {isIdle && recorder.permission === "granted" && (
-        <Card variant="glass">
+        <Card className="eleven-card">
           <CardContent className="py-5">
-            <h3 className="mb-3 text-sm font-semibold text-text-primary">Recording Tips</h3>
-            <ul className="space-y-2 text-xs text-text-secondary">
+            <h3 className="mb-3 text-sm font-semibold text-white">Recording Tips</h3>
+            <ul className="space-y-2 text-xs text-[#8b8fa3]">
               <li className="flex items-start gap-2">
-                <svg className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#818cf8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Record in a quiet environment for best results
               </li>
               <li className="flex items-start gap-2">
-                <svg className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#818cf8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Speak naturally at a normal pace and volume
               </li>
               <li className="flex items-start gap-2">
-                <svg className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#818cf8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Record at least 10-30 seconds for a good voice sample
               </li>
               <li className="flex items-start gap-2">
-                <svg className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#818cf8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Stay at a consistent distance from your microphone

@@ -9,15 +9,15 @@ export function LandingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border-primary bg-bg-primary/80 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[#090a0f]/70 backdrop-blur-2xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href={ROUTES.HOME} className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary">
+          <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] shadow-[0_0_20px_rgba(99,102,241,0.3)]">
             <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
           </div>
-          <span className="text-lg font-bold text-text-primary">{APP_NAME}</span>
+          <span className="text-lg font-bold tracking-tight text-white">{APP_NAME}</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -29,7 +29,7 @@ export function LandingHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary"
+              className="rounded-lg px-3.5 py-2 text-sm text-[#8b8fa3] transition-all hover:bg-white/[0.05] hover:text-white"
             >
               {item.label}
             </Link>
@@ -40,7 +40,7 @@ export function LandingHeader() {
           <UserMenu />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="rounded-lg p-2 text-text-secondary hover:bg-bg-elevated md:hidden"
+            className="rounded-lg p-2 text-[#8b8fa3] hover:bg-white/[0.05] md:hidden"
             aria-label="Toggle menu"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -55,7 +55,7 @@ export function LandingHeader() {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-border-primary bg-bg-secondary px-4 py-3 md:hidden">
+        <div className="border-t border-white/[0.06] bg-[#090a0f]/95 backdrop-blur-2xl px-4 py-3 md:hidden">
           {[
             { href: ROUTES.STUDIO, label: "Voice Studio" },
             { href: ROUTES.TEXT_TO_SPEECH, label: "Text to Speech" },
@@ -67,7 +67,7 @@ export function LandingHeader() {
               key={item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className="block rounded-lg px-3 py-2.5 text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
+              className="block rounded-lg px-3 py-2.5 text-sm text-[#8b8fa3] hover:bg-white/[0.05] hover:text-white"
             >
               {item.label}
             </Link>

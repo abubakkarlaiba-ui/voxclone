@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useNotification } from "@/hooks";
@@ -55,62 +54,70 @@ export default function SignupPage() {
   }, [name, email, password, confirmPassword, addNotification, router]);
 
   return (
-    <Card variant="glass">
-      <CardContent className="py-8">
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-accent-primary to-accent-secondary">
-            <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-            </svg>
-          </div>
-          <h1 className="text-xl font-bold text-text-primary">Create your {APP_NAME} account</h1>
-          <p className="mt-1 text-sm text-text-secondary">Get started with AI voice generation.</p>
+    <div className="eleven-card p-8">
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] shadow-[0_0_30px_rgba(99,102,241,0.3)]">
+          <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          </svg>
         </div>
+        <h1 className="text-xl font-bold text-white">Create your {APP_NAME} account</h1>
+        <p className="mt-1.5 text-sm text-[#8b8fa3]">Get started with AI voice generation.</p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Alex Morgan"
-            required
-          />
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            required
-          />
-          <Input
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 8 characters"
-            required
-          />
-          <Input
-            label="Confirm Password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm your password"
-            required
-          />
-          <Button type="submit" fullWidth isLoading={isLoading}>
-            Create Account
-          </Button>
-        </form>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Input
+          label="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Alex Morgan"
+          required
+        />
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          required
+        />
+        <Input
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="At least 8 characters"
+          required
+        />
+        <Input
+          label="Confirm Password"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Confirm your password"
+          required
+        />
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="btn-generate w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold"
+        >
+          {isLoading ? (
+            <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          ) : null}
+          Create Account
+        </button>
+      </form>
 
-        <p className="mt-6 text-center text-sm text-text-secondary">
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-accent-primary hover:underline">
-            Sign in
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+      <p className="mt-6 text-center text-sm text-[#8b8fa3]">
+        Already have an account?{" "}
+        <Link href="/login" className="font-medium text-[#818cf8] hover:text-[#a5b4fc] transition-colors">
+          Sign in
+        </Link>
+      </p>
+    </div>
   );
 }

@@ -38,7 +38,7 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border-primary bg-bg-secondary/80 backdrop-blur-xl lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.06] bg-[#090a0f]/90 backdrop-blur-2xl lg:hidden">
       <div className="flex items-center justify-around px-2 py-2">
         {NAV_ITEMS.slice(0, 5).map((item) => {
           const isActive = pathname === item.href;
@@ -49,11 +49,11 @@ export function MobileNav() {
               className={cn(
                 "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-medium transition-all",
                 isActive
-                  ? "text-accent-primary"
-                  : "text-text-muted"
+                  ? "text-[#818cf8]"
+                  : "text-[#5c6073]"
               )}
             >
-              <span className={cn("transition-colors", isActive && "text-accent-primary")}>
+              <span className={cn("transition-colors", isActive && "text-[#818cf8]")}>
                 {iconMap[item.icon]}
               </span>
               <span>{item.label.split(" ")[0]}</span>
