@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { cn, formatDuration } from "@/lib/utils";
+import { Equalizer } from "./Equalizer";
 
 interface AudioPlayerProps {
   src: string;
@@ -198,6 +199,7 @@ export function AudioPlayer({
             </svg>
           )}
         </button>
+        <Equalizer isPlaying={isPlaying} barCount={4} className="h-4 text-accent-primary" />
         <div className="flex flex-1 items-center gap-1.5">
           <span className="w-9 text-[10px] font-mono text-text-muted tabular-nums">
             {formatDuration(currentTime)}
@@ -279,6 +281,9 @@ export function AudioPlayer({
             </svg>
           )}
         </button>
+
+        {/* Equalizer */}
+        <Equalizer isPlaying={isPlaying} barCount={5} className="h-5 text-accent-primary" />
 
         {/* Volume */}
         {showVolume && (
