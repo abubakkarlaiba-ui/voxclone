@@ -438,31 +438,55 @@ export default function TextToSpeechPage() {
           </div>
 
           {/* Generate Button */}
-          <Button
-            onClick={handleGenerate}
-            disabled={!canGenerate}
-            isLoading={isGenerating}
-            fullWidth
-            size="lg"
-            className="text-base"
-          >
-            {isGenerating ? (
-              <span className="flex items-center gap-2">
-                <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Generating Speech...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                </svg>
-                Generate Speech
-              </span>
+          <div className="relative group">
+            {/* Radial glow backdrop */}
+            <div className={cn(
+              "absolute -inset-1 rounded-2xl transition-opacity duration-500",
+              canGenerate
+                ? "bg-gradient-to-r from-accent-primary/20 via-accent-secondary/20 to-accent-primary/20 opacity-100 blur-lg animate-glow-pulse"
+                : "opacity-0"
+            )} />
+            {/* Animated waveform ring */}
+            {canGenerate && !isGenerating && (
+              <svg className="absolute -inset-2 h-[calc(100%+16px)] w-[calc(100%+16px)] animate-spin-slow" viewBox="0 0 200 50" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="glow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="transparent" />
+                    <stop offset="30%" stopColor="rgba(99,102,241,0.4)" />
+                    <stop offset="50%" stopColor="rgba(139,92,246,0.6)" />
+                    <stop offset="70%" stopColor="rgba(99,102,241,0.4)" />
+                    <stop offset="100%" stopColor="transparent" />
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="200" height="50" rx="16" fill="none" stroke="url(#glow-grad)" strokeWidth="1.5" />
+              </svg>
             )}
-          </Button>
+            <Button
+              onClick={handleGenerate}
+              disabled={!canGenerate}
+              isLoading={isGenerating}
+              fullWidth
+              size="lg"
+              className="relative text-base font-semibold shadow-lg shadow-accent-primary/20 transition-shadow hover:shadow-accent-primary/30"
+            >
+              {isGenerating ? (
+                <span className="flex items-center gap-2">
+                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Generating Speech...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                  </svg>
+                  Generate Speech
+                </span>
+              )}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
