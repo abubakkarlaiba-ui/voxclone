@@ -17,7 +17,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const profile = getProfileById(id);
+    const profile = await getProfileById(id);
 
     if (!profile) {
       return NextResponse.json(
@@ -60,7 +60,7 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const profile = getProfileById(id);
+    const profile = await getProfileById(id);
 
     if (!profile) {
       return NextResponse.json(
@@ -105,7 +105,7 @@ export async function PATCH(
     if (name !== undefined) updates.name = name.trim();
     if (description !== undefined) updates.description = description.trim();
 
-    const updated = updateProfile(id, updates);
+    const updated = await updateProfile(id, updates);
 
     return NextResponse.json({
       success: true,
@@ -134,7 +134,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const profile = getProfileById(id);
+    const profile = await getProfileById(id);
 
     if (!profile) {
       return NextResponse.json(
@@ -150,7 +150,7 @@ export async function DELETE(
       );
     }
 
-    const deleted = deleteProfile(id);
+    const deleted = await deleteProfile(id);
     if (!deleted) {
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Voice profile not found" }, timestamp: new Date().toISOString() },

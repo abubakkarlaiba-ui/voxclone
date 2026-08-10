@@ -1,31 +1,63 @@
 import type { User } from "@/types/user";
+import { dbQuery, ensureSchema } from "./db";
 
-const g = globalThis as typeof globalThis & { __vxUsers?: User[] };
-if (!g.__vxUsers) g.__vxUsers = [];
-const users = g.__vxUsers;
-
-export function getUserByEmail(email: string): User | undefined {
-  return users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+  await ensureSchema();
+  const rows = await dbQuery`SELECT * FROM users WHERE LOWER(email) = LOWER(${email}) LIMIT 1`;
+  if (rows.length === 0) return undefined;
+  const r = rows[0];
+  return {
+    id: r.id as string,
+    email: r.email as string,
+    name: r.name as string,
+    passwordHash: r.password_hash as string,
+    salt: r.salt as string,
+    createdAt: r.created_at as string,
+  };
 }
 
-export function getUserById(id: string): User | undefined {
-  return users.find((u) => u.id === id);
+export async function getUserById(id: string): Promise<User | undefined> {
+  await ensureSchema();
+  const rows = await dbQuery`SELECT * FROM users WHERE id = ${id} LIMIT 1`;
+  if (rows.length === 0) return undefined;
+  const r = rows[0];
+  return {
+    id: r.id as string,
+    email: r.email as string,
+    name: r.name as string,
+    passwordHash: r.password_hash as string,
+    salt: r.salt as string,
+    createdAt: r.created_at as string,
+  };
 }
 
-export function addUser(user: User): void {
-  users.push(user);
+export async function addUser(user: User): Promise<void> {
+  await ensureSchema();
+  await dbQuery`
+    INSERT INTO users (id, email, name, password_hash, salt, created_at)
+    VALUES (${user.id}, ${user.email}, ${user.name}, ${user.passwordHash}, ${user.salt}, ${user.createdAt})
+  `;
 }
 
-export function updateUser(id: string, updates: Partial<User>): User | null {
-  const user = getUserById(id);
-  if (!user) return null;
-  Object.assign(user, updates);
-  return user;
+export async function updateUser(id: string, updates: Partial<User>): Promise<User | null> {
+  await ensureSchema();
+  const existing = await getUserById(id);
+  if (!existing) return null;
+
+  const email = updates.email ?? existing.email;
+  const name = updates.name ?? existing.name;
+  const passwordHash = updates.passwordHash ?? existing.passwordHash;
+  const salt = updates.salt ?? existing.salt;
+
+  await dbQuery`
+    UPDATE users SET email = ${email}, name = ${name}, password_hash = ${passwordHash}, salt = ${salt}
+    WHERE id = ${id}
+  `;
+  return getUserById(id) as Promise<User>;
 }
 
-export function deleteUser(id: string): boolean {
-  const index = users.findIndex((u) => u.id === id);
-  if (index === -1) return false;
-  users.splice(index, 1);
+export async function deleteUser(id: string): Promise<boolean> {
+  await ensureSchema();
+  await dbQuery`DELETE FROM users WHERE id = ${id}`;
   return true;
 }

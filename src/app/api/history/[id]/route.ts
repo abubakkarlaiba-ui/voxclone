@@ -17,7 +17,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const item = getHistoryItemById(id);
+    const item = await getHistoryItemById(id);
 
     if (!item) {
       return NextResponse.json(
@@ -33,7 +33,7 @@ export async function DELETE(
       );
     }
 
-    const deleted = deleteHistoryItem(id);
+    const deleted = await deleteHistoryItem(id);
     if (!deleted) {
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "History item not found" }, timestamp: new Date().toISOString() },

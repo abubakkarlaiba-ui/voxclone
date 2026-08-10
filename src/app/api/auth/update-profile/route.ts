@@ -34,7 +34,7 @@ export async function PATCH(
     const body = await request.json();
     const { name, email, currentPassword, newPassword } = body as UpdateProfileBody;
 
-    const user = getUserById(session.userId);
+    const user = await getUserById(session.userId);
     if (!user) {
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "User not found" }, timestamp: new Date().toISOString() },
@@ -113,7 +113,7 @@ export async function PATCH(
       );
     }
 
-    const updated = updateUser(session.userId, updates);
+    const updated = await updateUser(session.userId, updates);
     if (!updated) {
       return NextResponse.json(
         { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to update profile" }, timestamp: new Date().toISOString() },

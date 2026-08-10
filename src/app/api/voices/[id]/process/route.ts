@@ -18,7 +18,7 @@ export async function POST(
     }
 
     const { id } = await params;
-    const profile = getProfileById(id);
+    const profile = await getProfileById(id);
 
     if (!profile) {
       return NextResponse.json(
@@ -51,7 +51,7 @@ export async function POST(
     const provider = getVoiceProvider();
 
     if (!provider.isConfigured()) {
-      updateProfile(id, {
+      await updateProfile(id, {
         status: "failed",
         errorMessage: "Voice API not configured.",
       });
@@ -69,7 +69,7 @@ export async function POST(
       );
     }
 
-    updateProfile(id, { status: "processing", errorMessage: null });
+    await updateProfile(id, { status: "processing", errorMessage: null });
 
     const sampleBuffers: { filename: string; mimeType: string; buffer: Buffer }[] = [];
 
@@ -94,7 +94,7 @@ export async function POST(
     }
 
     if (sampleBuffers.length === 0) {
-      updateProfile(id, {
+      await updateProfile(id, {
         status: "failed",
         errorMessage: "No audio data available for processing. Re-record or re-upload samples.",
       });
@@ -119,7 +119,7 @@ export async function POST(
         samples: sampleBuffers,
       });
 
-      const updated = updateProfile(id, {
+      const updated = await updateProfile(id, {
         status: "ready",
         providerVoiceId: cloneResult.providerVoiceId,
         processedAt: new Date().toISOString(),
@@ -136,7 +136,7 @@ export async function POST(
         ? "Voice processing failed. Please try again later."
         : "Voice processing failed. Please try again later.";
 
-      updateProfile(id, {
+      await updateProfile(id, {
         status: "failed",
         errorMessage: "Voice processing failed.",
       });

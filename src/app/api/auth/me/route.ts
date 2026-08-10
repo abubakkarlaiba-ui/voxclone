@@ -24,7 +24,7 @@ export async function GET(
       );
     }
 
-    const user = getUserById(session.userId);
+    const user = await getUserById(session.userId);
     if (!user) {
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "User not found" }, timestamp: new Date().toISOString() },

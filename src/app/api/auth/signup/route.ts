@@ -65,7 +65,7 @@ export async function POST(
       );
     }
 
-    const existing = getUserByEmail(email);
+    const existing = await getUserByEmail(email);
     if (existing) {
       return NextResponse.json(
         { success: false, error: { code: "CONFLICT", message: "An account with this email already exists" }, timestamp: new Date().toISOString() },
@@ -77,7 +77,7 @@ export async function POST(
     const now = new Date().toISOString();
     const id = crypto.randomUUID();
 
-    addUser({
+    await addUser({
       id,
       email: email.toLowerCase().trim(),
       name: name.trim(),

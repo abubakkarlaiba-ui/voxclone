@@ -44,7 +44,7 @@ export async function POST(
       );
     }
 
-    const user = getUserByEmail(email);
+    const user = await getUserByEmail(email);
     if (!user) {
       return NextResponse.json(
         { success: false, error: { code: "INVALID_CREDENTIALS", message: "Invalid email or password" }, timestamp: new Date().toISOString() },

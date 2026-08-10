@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ApiResponse, VoiceSample, AddSampleRequest } from "@/types";
-import { getProfileById } from "@/lib/voice-store";
+import { getProfileById, updateProfile } from "@/lib/voice-store";
 import { getAuthenticatedUser } from "@/lib/api-auth";
 
 const MAX_SAMPLES_PER_PROFILE = 20;
@@ -29,7 +29,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const profile = getProfileById(id);
+    const profile = await getProfileById(id);
 
     if (!profile) {
       return NextResponse.json(
@@ -72,7 +72,7 @@ export async function POST(
     }
 
     const { id } = await params;
-    const profile = getProfileById(id);
+    const profile = await getProfileById(id);
 
     if (!profile) {
       return NextResponse.json(
@@ -112,7 +112,6 @@ export async function POST(
       );
     }
 
-    // Normalize MIME type: strip codec params (e.g. "audio/webm;codecs=opus" -> "audio/webm")
     const normalizedMime = mimeType?.split(";")[0]?.trim().toLowerCase() || "";
 
     if (!mimeType || typeof mimeType !== "string" || !ALLOWED_MIME_TYPES.includes(normalizedMime)) {
@@ -151,14 +150,14 @@ export async function POST(
       blob: null,
       duration,
       size: size || 0,
-      mimeType: mimeType.toLowerCase(),
+      mimeType: normalizedMime,
       source: source || "upload",
       createdAt: new Date().toISOString(),
     };
 
-    profile.samples.push(sample);
-    profile.totalDuration = profile.samples.reduce((sum, s) => sum + s.duration, 0);
-    profile.updatedAt = new Date().toISOString();
+    const updatedSamples = [...profile.samples, sample];
+    const totalDuration = updatedSamples.reduce((sum, s) => sum + s.duration, 0);
+    await updateProfile(id, { samples: updatedSamples, totalDuration });
 
     return NextResponse.json(
       { success: true, data: sample, timestamp: new Date().toISOString() },
@@ -186,7 +185,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const profile = getProfileById(id);
+    const profile = await getProfileById(id);
 
     if (!profile) {
       return NextResponse.json(
@@ -220,9 +219,9 @@ export async function DELETE(
       );
     }
 
-    profile.samples.splice(sampleIndex, 1);
-    profile.totalDuration = profile.samples.reduce((sum, s) => sum + s.duration, 0);
-    profile.updatedAt = new Date().toISOString();
+    const updatedSamples = profile.samples.filter((s) => s.id !== sampleId);
+    const totalDuration = updatedSamples.reduce((sum, s) => sum + s.duration, 0);
+    await updateProfile(id, { samples: updatedSamples, totalDuration });
 
     return NextResponse.json({
       success: true,

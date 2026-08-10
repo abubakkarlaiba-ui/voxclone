@@ -48,7 +48,7 @@ export async function POST(
       );
     }
 
-    const profile = getProfileById(voiceId);
+    const profile = await getProfileById(voiceId);
 
     if (!profile) {
       return NextResponse.json(

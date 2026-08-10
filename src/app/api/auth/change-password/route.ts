@@ -47,7 +47,7 @@ export async function POST(
       );
     }
 
-    const user = getUserById(session.userId);
+    const user = await getUserById(session.userId);
     if (!user) {
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "User not found" }, timestamp: new Date().toISOString() },
@@ -65,7 +65,7 @@ export async function POST(
     }
 
     const { hash, salt } = await hashPassword(newPassword);
-    updateUser(session.userId, { passwordHash: hash, salt });
+    await updateUser(session.userId, { passwordHash: hash, salt });
 
     return NextResponse.json({
       success: true,

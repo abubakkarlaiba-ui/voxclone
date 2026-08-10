@@ -21,7 +21,7 @@ export async function GET(
     const search = searchParams.get("search") || undefined;
     const voiceId = searchParams.get("voiceId") || undefined;
 
-    const result = getHistoryList(user.userId, { page, pageSize, search, voiceId });
+    const result = await getHistoryList(user.userId, { page, pageSize, search, voiceId });
 
     return NextResponse.json({
       success: true,
@@ -93,7 +93,7 @@ export async function POST(
       createdAt: new Date().toISOString(),
     };
 
-    addHistoryItem(item);
+    await addHistoryItem(item);
 
     return NextResponse.json({
       success: true,
@@ -124,7 +124,7 @@ export async function DELETE(
       );
     }
 
-    clearHistory(user.userId);
+    await clearHistory(user.userId);
     return NextResponse.json({
       success: true,
       data: null,

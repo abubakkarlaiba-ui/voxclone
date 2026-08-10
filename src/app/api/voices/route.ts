@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    const profiles = getProfilesByUserId(user.userId);
+    const profiles = await getProfilesByUserId(user.userId);
     return NextResponse.json({
       success: true,
       data: profiles,
@@ -81,7 +81,7 @@ export async function POST(
       errorMessage: null,
     };
 
-    addProfile(profile);
+    await addProfile(profile);
 
     return NextResponse.json(
       { success: true, data: profile, timestamp: now },
