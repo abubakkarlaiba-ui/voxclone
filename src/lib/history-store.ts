@@ -1,12 +1,8 @@
 import type { HistoryItem, HistoryListParams, HistoryListResult } from "@/types";
 
-/**
- * Shared in-memory store for generation history.
- *
- * IMPORTANT: This data is lost on server restart.
- * In production, replace with a real database.
- */
-const items: HistoryItem[] = [];
+const g = globalThis as typeof globalThis & { __vxHistory?: HistoryItem[] };
+if (!g.__vxHistory) g.__vxHistory = [];
+const items = g.__vxHistory;
 
 export function getHistoryList(userId: string, params: HistoryListParams): HistoryListResult {
   let filtered = items.filter((item) => item.userId === userId);

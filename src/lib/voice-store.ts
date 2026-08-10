@@ -1,12 +1,8 @@
 import type { VoiceProfile } from "@/types";
 
-/**
- * Shared in-memory store for development.
- *
- * IMPORTANT: This data is lost on server restart.
- * In production, replace with a real database.
- */
-const profiles: VoiceProfile[] = [];
+const g = globalThis as typeof globalThis & { __vxProfiles?: VoiceProfile[] };
+if (!g.__vxProfiles) g.__vxProfiles = [];
+const profiles = g.__vxProfiles;
 
 export function getProfilesByUserId(userId: string): VoiceProfile[] {
   return profiles.filter((p) => p.userId === userId);

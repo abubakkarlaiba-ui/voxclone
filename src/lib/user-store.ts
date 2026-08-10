@@ -1,12 +1,8 @@
 import type { User } from "@/types/user";
 
-/**
- * Shared in-memory user store for development.
- *
- * IMPORTANT: This data is lost on server restart.
- * In production, replace with a real database.
- */
-const users: User[] = [];
+const g = globalThis as typeof globalThis & { __vxUsers?: User[] };
+if (!g.__vxUsers) g.__vxUsers = [];
+const users = g.__vxUsers;
 
 export function getUserByEmail(email: string): User | undefined {
   return users.find((u) => u.email.toLowerCase() === email.toLowerCase());

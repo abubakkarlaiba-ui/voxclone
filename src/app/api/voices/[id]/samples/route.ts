@@ -112,7 +112,10 @@ export async function POST(
       );
     }
 
-    if (!mimeType || typeof mimeType !== "string" || !ALLOWED_MIME_TYPES.includes(mimeType.toLowerCase())) {
+    // Normalize MIME type: strip codec params (e.g. "audio/webm;codecs=opus" -> "audio/webm")
+    const normalizedMime = mimeType?.split(";")[0]?.trim().toLowerCase() || "";
+
+    if (!mimeType || typeof mimeType !== "string" || !ALLOWED_MIME_TYPES.includes(normalizedMime)) {
       return NextResponse.json(
         { success: false, error: { code: "VALIDATION_ERROR", message: "Unsupported audio format. Use WebM, WAV, MP3, or OGG." }, timestamp: new Date().toISOString() },
         { status: 400 }

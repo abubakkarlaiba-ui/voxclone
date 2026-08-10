@@ -10,13 +10,69 @@ import { useNotification } from "@/hooks";
 import { NotificationContainer } from "@/components/ui/Notification";
 
 export default function SettingsPage() {
-  const { user, isLoading, logout } = useUser();
+  const { user, isLoading, logout, refresh } = useUser();
   const { notifications, addNotification, removeNotification } = useNotification();
+
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const startEditingProfile = useCallback(() => {
+    if (!user) return;
+    setEditName(user.name);
+    setEditEmail(user.email);
+    setIsEditingProfile(true);
+  }, [user]);
+
+  const cancelEditingProfile = useCallback(() => {
+    setIsEditingProfile(false);
+    setEditName("");
+    setEditEmail("");
+  }, []);
+
+  const handleSaveProfile = useCallback(async () => {
+    if (!user) return;
+
+    const trimmedName = editName.trim();
+    const trimmedEmail = editEmail.trim().toLowerCase();
+
+    if (!trimmedName) {
+      addNotification("error", "Name cannot be empty");
+      return;
+    }
+
+    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      addNotification("error", "Invalid email address");
+      return;
+    }
+
+    setIsSavingProfile(true);
+    try {
+      const res = await fetch("/api/auth/update-profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: trimmedName, email: trimmedEmail }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        addNotification("success", "Profile updated successfully!");
+        setIsEditingProfile(false);
+        if (refresh) await refresh();
+      } else {
+        addNotification("error", data.error?.message || "Failed to update profile");
+      }
+    } catch {
+      addNotification("error", "Failed to update profile");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  }, [user, editName, editEmail, addNotification, refresh]);
 
   const handleChangePassword = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,22 +140,76 @@ export default function SettingsPage() {
       {/* Profile Card */}
       <Card variant="glass" className="mb-6">
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Your account information.</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Profile</CardTitle>
+              <CardDescription>Your account information.</CardDescription>
+            </div>
+            {!isEditingProfile && (
+              <Button variant="secondary" size="sm" onClick={startEditingProfile}>
+                Edit
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-primary/10 text-xl font-bold text-accent-primary">
-              {initials}
+          {isEditingProfile ? (
+            <>
+              <div className="flex items-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-primary/10 text-xl font-bold text-accent-primary">
+                  {initials}
+                </div>
+                <div className="flex-1">
+                  <Input
+                    label="Name"
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Your name"
+                    required
+                  />
+                </div>
+              </div>
+              <Input
+                label="Email"
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+              />
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={cancelEditingProfile}
+                  disabled={isSavingProfile}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  isLoading={isSavingProfile}
+                  onClick={handleSaveProfile}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-primary/10 text-xl font-bold text-accent-primary">
+                {initials}
+              </div>
+              <div>
+                <p className="text-base font-semibold text-text-primary">{user.name}</p>
+                <p className="text-sm text-text-secondary">{user.email}</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  Member since {new Date(user.createdAt).toLocaleDateString()}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-base font-semibold text-text-primary">{user.name}</p>
-              <p className="text-sm text-text-secondary">{user.email}</p>
-              <p className="mt-1 text-xs text-text-muted">
-                Member since {new Date(user.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 

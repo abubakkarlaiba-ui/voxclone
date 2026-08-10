@@ -10,7 +10,9 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
-const store = new Map<string, RateLimitEntry>();
+const g = globalThis as typeof globalThis & { __vxRateLimit?: Map<string, RateLimitEntry> };
+if (!g.__vxRateLimit) g.__vxRateLimit = new Map<string, RateLimitEntry>();
+const store = g.__vxRateLimit;
 
 const CLEANUP_INTERVAL = 60_000;
 

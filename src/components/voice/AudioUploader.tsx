@@ -21,7 +21,10 @@ export function AudioUploader({ onUpload, isUploading = false, disabled = false,
   const validateFile = useCallback((file: File): boolean => {
     setError(null);
 
-    if (!ACCEPTED_TYPES.includes(file.type) && !file.name.match(/\.(webm|wav|mp3|ogg|m4a|flac)$/i)) {
+    // Normalize MIME type by stripping codec params
+    const normalizedType = file.type.split(";")[0].trim().toLowerCase();
+
+    if (!ACCEPTED_TYPES.includes(normalizedType) && !file.name.match(/\.(webm|wav|mp3|ogg|m4a|flac)$/i)) {
       setError("Unsupported format. Use WebM, WAV, MP3, or OGG.");
       return false;
     }
