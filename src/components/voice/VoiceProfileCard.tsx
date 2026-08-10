@@ -9,6 +9,7 @@ import { AudioPlayer } from "@/components/ui/AudioPlayer";
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
 import { useNotification } from "@/hooks";
 import { cn, formatDuration } from "@/lib/utils";
+import { getInitials } from "@/lib/flags";
 import type { VoiceProfile, VoiceProfileStatus } from "@/types";
 
 interface VoiceProfileCardProps {
@@ -144,9 +145,15 @@ export function VoiceProfileCard({
       >
         <CardContent className="flex flex-col">
           {/* Header */}
-          <div className="mb-3 flex items-start justify-between">
-            <div className="min-w-0 flex-1">
-              {isEditing ? (
+          <div className="mb-3 flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="relative flex-shrink-0">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-primary/15 text-xs font-semibold text-accent-primary">
+                  {getInitials(profile.name)}
+                </div>
+              </div>
+              <div className="min-w-0 flex-1">
+                {isEditing ? (
                 <div className="flex items-center gap-2">
                   <Input
                     value={editName}
@@ -193,10 +200,11 @@ export function VoiceProfileCard({
                   </button>
                 </div>
               )}
+              </div>
             </div>
             <span
               className={cn(
-                "ml-2 inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                "inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium",
                 status.className
               )}
             >

@@ -12,6 +12,7 @@ import { useNotification } from "@/hooks";
 import { NotificationContainer } from "@/components/ui/Notification";
 import { PlaybackWaveform } from "@/components/voice/PlaybackWaveform";
 import { cn } from "@/lib/utils";
+import { getLanguageFlag, getInitials } from "@/lib/flags";
 import type { VoiceProfile, GeneratedAudio, GenerateOptions, ProviderCapabilities } from "@/types";
 
 const TEXT_LIMITS = { min: 1, max: 5000 } as const;
@@ -339,47 +340,54 @@ export default function TextToSpeechPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {voices.map((voice) => (
-              <button
-                key={voice.id}
-                onClick={() => setSelectedVoiceId(voice.id)}
-                className={cn(
-                  "flex items-start gap-3 rounded-xl border p-4 text-left transition-all",
-                  selectedVoiceId === voice.id
-                    ? "border-accent-primary bg-accent-primary/5 ring-1 ring-accent-primary/20"
-                    : "border-border-primary bg-bg-tertiary hover:border-border-secondary"
-                )}
-              >
-                <div className={cn(
-                  "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full",
-                  selectedVoiceId === voice.id
-                    ? "bg-accent-primary/20 text-accent-primary"
-                    : "bg-bg-elevated text-text-muted"
-                )}>
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                  </svg>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-text-primary">{voice.name}</p>
-                  {voice.description && (
-                    <p className="mt-0.5 truncate text-xs text-text-muted">{voice.description}</p>
+            {voices.map((voice) => {
+              const flag = getLanguageFlag(options?.language);
+              const initials = getInitials(voice.name);
+              return (
+                <button
+                  key={voice.id}
+                  onClick={() => setSelectedVoiceId(voice.id)}
+                  className={cn(
+                    "flex items-start gap-3 rounded-xl border p-4 text-left transition-all",
+                    selectedVoiceId === voice.id
+                      ? "border-accent-primary bg-accent-primary/5 ring-1 ring-accent-primary/20"
+                      : "border-border-primary bg-bg-tertiary hover:border-border-secondary"
                   )}
-                  <div className="mt-1.5 flex items-center gap-2 text-[11px] text-text-muted">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-1.5 py-0.5 text-success">
-                      <span className="h-1 w-1 rounded-full bg-success" />
-                      Authorized
+                >
+                  <div className="relative flex-shrink-0">
+                    <div className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold",
+                      selectedVoiceId === voice.id
+                        ? "bg-accent-primary/20 text-accent-primary"
+                        : "bg-bg-elevated text-text-muted"
+                    )}>
+                      {initials}
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 text-sm leading-none" title="Default language">
+                      {flag}
                     </span>
-                    <span>{voice.samples.length} samples</span>
                   </div>
-                </div>
-                {selectedVoiceId === voice.id && (
-                  <svg className="h-5 w-5 flex-shrink-0 text-accent-primary" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                  </svg>
-                )}
-              </button>
-            ))}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-text-primary">{voice.name}</p>
+                    {voice.description && (
+                      <p className="mt-0.5 truncate text-xs text-text-muted">{voice.description}</p>
+                    )}
+                    <div className="mt-1.5 flex items-center gap-2 text-[11px] text-text-muted">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-1.5 py-0.5 text-success">
+                        <span className="h-1 w-1 rounded-full bg-success" />
+                        Authorized
+                      </span>
+                      <span>{voice.samples.length} sample{voice.samples.length !== 1 ? "s" : ""}</span>
+                    </div>
+                  </div>
+                  {selectedVoiceId === voice.id && (
+                    <svg className="h-5 w-5 flex-shrink-0 text-accent-primary" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
