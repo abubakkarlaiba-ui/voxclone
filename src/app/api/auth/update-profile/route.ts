@@ -125,6 +125,7 @@ export async function PATCH(
       id: updated.id,
       email: updated.email,
       name: updated.name,
+      avatarUrl: updated.avatarUrl,
       createdAt: updated.createdAt,
     };
 

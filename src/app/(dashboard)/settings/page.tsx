@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -12,11 +12,14 @@ import { NotificationContainer } from "@/components/ui/Notification";
 export default function SettingsPage() {
   const { user, isLoading, logout, refresh } = useUser();
   const { notifications, addNotification, removeNotification } = useNotification();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -73,6 +76,49 @@ export default function SettingsPage() {
       setIsSavingProfile(false);
     }
   }, [user, editName, editEmail, addNotification, refresh]);
+
+  const handleAvatarUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const res = await fetch("/api/auth/avatar", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        addNotification("success", "Profile photo updated!");
+        if (refresh) await refresh();
+      } else {
+        addNotification("error", data.error?.message || "Failed to upload photo");
+      }
+    } catch {
+      addNotification("error", "Failed to upload photo");
+    } finally {
+      setIsUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [addNotification, refresh]);
+
+  const handleRemoveAvatar = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/avatar", { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        addNotification("success", "Profile photo removed.");
+        if (refresh) await refresh();
+      } else {
+        addNotification("error", data.error?.message || "Failed to remove photo");
+      }
+    } catch {
+      addNotification("error", "Failed to remove photo");
+    }
+  }, [addNotification, refresh]);
 
   const handleChangePassword = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,6 +183,68 @@ export default function SettingsPage() {
         <p className="mt-1 text-sm text-text-secondary">Manage your account settings.</p>
       </div>
 
+      {/* Profile Photo Card */}
+      <Card variant="glass" className="mb-6">
+        <CardHeader>
+          <CardTitle>Profile Photo</CardTitle>
+          <CardDescription>Your profile picture visible across the app.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6">
+            <div className="relative group">
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  className="h-20 w-20 rounded-full object-cover ring-2 ring-border-primary"
+                />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 text-2xl font-bold text-accent-primary ring-2 ring-border-primary">
+                  {initials}
+                </div>
+              )}
+              {isUploadingAvatar && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {user.avatarUrl ? "Change Photo" : "Upload Photo"}
+              </Button>
+              {user.avatarUrl && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-text-muted hover:text-error"
+                  onClick={handleRemoveAvatar}
+                >
+                  Remove Photo
+                </Button>
+              )}
+              <p className="text-[11px] text-text-muted">JPEG, PNG, WebP, or GIF. Max 2MB.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Profile Card */}
       <Card variant="glass" className="mb-6">
         <CardHeader>
@@ -155,21 +263,14 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           {isEditingProfile ? (
             <>
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-primary/10 text-xl font-bold text-accent-primary">
-                  {initials}
-                </div>
-                <div className="flex-1">
-                  <Input
-                    label="Name"
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    placeholder="Your name"
-                    required
-                  />
-                </div>
-              </div>
+              <Input
+                label="Name"
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Your name"
+                required
+              />
               <Input
                 label="Email"
                 type="email"
@@ -197,16 +298,18 @@ export default function SettingsPage() {
               </div>
             </>
           ) : (
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-primary/10 text-xl font-bold text-accent-primary">
-                {initials}
+            <div className="space-y-2">
+              <div>
+                <p className="text-xs text-text-muted">Name</p>
+                <p className="text-sm font-medium text-text-primary">{user.name}</p>
               </div>
               <div>
-                <p className="text-base font-semibold text-text-primary">{user.name}</p>
-                <p className="text-sm text-text-secondary">{user.email}</p>
-                <p className="mt-1 text-xs text-text-muted">
-                  Member since {new Date(user.createdAt).toLocaleDateString()}
-                </p>
+                <p className="text-xs text-text-muted">Email</p>
+                <p className="text-sm font-medium text-text-primary">{user.email}</p>
+              </div>
+              <div>
+                <p className="text-xs text-text-muted">Member since</p>
+                <p className="text-sm font-medium text-text-primary">{new Date(user.createdAt).toLocaleDateString()}</p>
               </div>
             </div>
           )}

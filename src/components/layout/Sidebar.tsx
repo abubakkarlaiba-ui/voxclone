@@ -102,9 +102,17 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
         <div className="border-t border-border-primary p-4">
           <div className="flex items-center gap-3 rounded-xl px-3 py-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 text-sm font-semibold text-accent-primary">
-              {initials}
-            </div>
+            {user?.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={userName}
+                className="h-9 w-9 rounded-full object-cover ring-1 ring-border-primary"
+              />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 text-sm font-semibold text-accent-primary">
+                {initials}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="truncate text-sm font-medium text-text-primary">{userName}</p>
               <p className="truncate text-xs text-text-muted">{userEmail}</p>

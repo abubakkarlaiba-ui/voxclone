@@ -77,16 +77,17 @@ export async function POST(
     const now = new Date().toISOString();
     const id = crypto.randomUUID();
 
-    await addUser({
+    await     addUser({
       id,
       email: email.toLowerCase().trim(),
       name: name.trim(),
       passwordHash: hash,
       salt,
+      avatarUrl: null,
       createdAt: now,
     });
 
-    const userPublic: UserPublic = { id, email: email.toLowerCase().trim(), name: name.trim(), createdAt: now };
+    const userPublic: UserPublic = { id, email: email.toLowerCase().trim(), name: name.trim(), avatarUrl: null, createdAt: now };
     const token = await createSessionToken(userPublic);
 
     const response = NextResponse.json({

@@ -60,7 +60,7 @@ export async function POST(
       );
     }
 
-    const userPublic: UserPublic = { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt };
+    const userPublic: UserPublic = { id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl, createdAt: user.createdAt };
     const token = await createSessionToken(userPublic);
 
     const response = NextResponse.json({

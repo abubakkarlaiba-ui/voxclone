@@ -33,6 +33,7 @@ export async function ensureSchema(): Promise<void> {
       name TEXT NOT NULL,
       password_hash TEXT NOT NULL,
       salt TEXT NOT NULL,
+      avatar_url TEXT,
       created_at TEXT NOT NULL DEFAULT (now()::text)
     )`;
 
