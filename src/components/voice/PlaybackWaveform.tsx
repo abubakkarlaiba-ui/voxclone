@@ -211,7 +211,7 @@ export function PlaybackWaveform({
   }
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col gap-3 eleven-glow-bg rounded-2xl", className)}>
       <audio ref={audioRef} src={src} />
 
       {/* Waveform visualization */}

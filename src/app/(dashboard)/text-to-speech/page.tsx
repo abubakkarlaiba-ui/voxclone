@@ -446,7 +446,7 @@ export default function TextToSpeechPage() {
           </div>
 
           {/* Generate Button */}
-          <div className="relative group">
+          <div className="relative group eleven-glow-bg">
             {/* Radial glow backdrop */}
             <div className={cn(
               "absolute -inset-1 rounded-2xl transition-opacity duration-500",
