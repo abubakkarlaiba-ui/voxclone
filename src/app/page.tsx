@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { ROUTES } from "@/lib/constants";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { Footer } from "@/components/layout/Footer";
+import { ScrollReveal, StaggerReveal } from "@/components/ui/ScrollReveal";
+import { FloatingOrbs } from "@/components/ui/FloatingOrbs";
 
 const features = [
   {
@@ -86,43 +90,45 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative flex min-h-screen items-center overflow-hidden pt-16">
-        {/* Background effects */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[800px] rounded-full bg-[#6366f1]/[0.07] blur-[120px]" />
-          <div className="absolute left-1/4 top-1/3 h-[400px] w-[400px] rounded-full bg-[#8b5cf6]/[0.05] blur-[100px]" />
-          <div className="absolute bottom-1/4 right-1/4 h-[300px] w-[300px] rounded-full bg-[#22d3ee]/[0.03] blur-[80px]" />
-          {/* Grid overlay */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{
-            backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
-            backgroundSize: "60px 60px"
-          }} />
-        </div>
+        <FloatingOrbs count={5} />
+        {/* Grid overlay */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px"
+        }} />
 
         <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-[#8b8fa3] backdrop-blur-sm">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-              AI-Powered Voice Generation
-            </div>
+            <ScrollReveal>
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-[#8b8fa3] backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                AI-Powered Voice Generation
+              </div>
+            </ScrollReveal>
 
-            <h1 className="mb-6 text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
-              Your Voice,{" "}
-              <span className="bg-gradient-to-r from-[#818cf8] via-[#a78bfa] to-[#c084fc] bg-clip-text text-transparent">
-                Powered by AI
-              </span>
-            </h1>
+            <ScrollReveal delay={100}>
+              <h1 className="mb-6 text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
+                Your Voice,{" "}
+                <span className="gradient-text-animated">
+                  Powered by AI
+                </span>
+              </h1>
+            </ScrollReveal>
 
-            <p className="mb-10 text-lg leading-relaxed text-[#8b8fa3] sm:text-xl">
-              Record your voice once, then generate unlimited speech in your own
-              voice. Create personalized voiceovers, narrations, and more with
-              cutting-edge AI technology.
-            </p>
+            <ScrollReveal delay={200}>
+              <p className="mb-10 text-lg leading-relaxed text-[#8b8fa3] sm:text-xl">
+                Record your voice once, then generate unlimited speech in your own
+                voice. Create personalized voiceovers, narrations, and more with
+                cutting-edge AI technology.
+              </p>
+            </ScrollReveal>
 
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                href={ROUTES.STUDIO}
-                className="btn-generate flex items-center gap-2.5 px-8 py-3.5 text-base font-semibold"
-              >
+            <ScrollReveal delay={300}>
+              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <Link
+                  href={ROUTES.STUDIO}
+                  className="btn-generate btn-press flex items-center gap-2.5 px-8 py-3.5 text-base font-semibold"
+                >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
@@ -137,28 +143,31 @@ export default function Home() {
                 </svg>
                 Text to Speech
               </Link>
-            </div>
+              </div>
+            </ScrollReveal>
 
-            <div className="mt-14 flex items-center justify-center gap-8 text-sm text-[#5c6073]">
-              <div className="flex items-center gap-2">
-                <svg className="h-4 w-4 text-[#22c55e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Free to start
+            <ScrollReveal delay={400}>
+              <div className="mt-14 flex items-center justify-center gap-8 text-sm text-[#5c6073]">
+                <div className="flex items-center gap-2">
+                  <svg className="h-4 w-4 text-[#22c55e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Free to start
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg className="h-4 w-4 text-[#22c55e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  No credit card required
+                </div>
+                <div className="hidden items-center gap-2 sm:flex">
+                  <svg className="h-4 w-4 text-[#22c55e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  30-second setup
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <svg className="h-4 w-4 text-[#22c55e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                No credit card required
-              </div>
-              <div className="hidden items-center gap-2 sm:flex">
-                <svg className="h-4 w-4 text-[#22c55e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                30-second setup
-              </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -166,21 +175,23 @@ export default function Home() {
       {/* Features Section */}
       <section className="border-t border-white/[0.06] py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
-              Everything you need
-            </h2>
-            <p className="mx-auto max-w-2xl text-[#8b8fa3]">
-              A complete voice generation platform with professional-grade features
-              designed for creators, developers, and businesses.
-            </p>
-          </div>
+          <ScrollReveal>
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
+                Everything you need
+              </h2>
+              <p className="mx-auto max-w-2xl text-[#8b8fa3]">
+                A complete voice generation platform with professional-grade features
+                designed for creators, developers, and businesses.
+              </p>
+            </div>
+          </ScrollReveal>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StaggerReveal className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 transition-all duration-300 hover:border-white/[0.1] hover:bg-white/[0.04]"
+                className="reveal eleven-card group p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04] card-tilt"
               >
                 <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#6366f1]/10 text-[#818cf8] transition-colors group-hover:bg-[#6366f1]/15">
                   {feature.icon}
@@ -193,25 +204,27 @@ export default function Home() {
                 </p>
               </div>
             ))}
-          </div>
+          </StaggerReveal>
         </div>
       </section>
 
       {/* How It Works Section */}
       <section className="border-t border-white/[0.06] py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
-              How it works
-            </h2>
-            <p className="mx-auto max-w-2xl text-[#8b8fa3]">
-              Get started in three simple steps. No technical knowledge required.
-            </p>
-          </div>
+          <ScrollReveal>
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
+                How it works
+              </h2>
+              <p className="mx-auto max-w-2xl text-[#8b8fa3]">
+                Get started in three simple steps. No technical knowledge required.
+              </p>
+            </div>
+          </ScrollReveal>
 
-          <div className="grid gap-8 md:grid-cols-3">
+          <StaggerReveal className="grid gap-8 md:grid-cols-3">
             {steps.map((step, i) => (
-              <div key={step.number} className="relative text-center">
+              <div key={step.number} className="reveal relative text-center">
                 <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-lg font-bold text-white shadow-[0_0_30px_rgba(99,102,241,0.3)]">
                   {step.number}
                 </div>
@@ -226,20 +239,21 @@ export default function Home() {
                 </p>
               </div>
             ))}
-          </div>
+          </StaggerReveal>
         </div>
       </section>
 
       {/* Privacy Section */}
       <section className="border-t border-white/[0.06] py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#22c55e]/10">
-              <svg className="h-7 w-7 text-[#22c55e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
+          <ScrollReveal>
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#22c55e]/10">
+                <svg className="h-7 w-7 text-[#22c55e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
               Your voice is safe with us
             </h2>
             <p className="mb-8 text-[#8b8fa3]">
@@ -258,22 +272,24 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </ScrollReveal>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="eleven-card eleven-glow-bg relative overflow-hidden p-12 text-center sm:p-16">
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-[#6366f1]/10 blur-3xl" />
-              <div className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-[#8b5cf6]/10 blur-3xl" />
-            </div>
-            <div className="relative">
-              <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
-                Ready to get started?
-              </h2>
-              <p className="mx-auto mb-8 max-w-lg text-[#8b8fa3]">
+          <ScrollReveal>
+            <div className="eleven-card eleven-glow-bg relative overflow-hidden p-12 text-center sm:p-16">
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-[#6366f1]/10 blur-3xl animate-float-1" />
+                <div className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-[#8b5cf6]/10 blur-3xl animate-float-2" />
+              </div>
+              <div className="relative">
+                <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
+                  Ready to get started?
+                </h2>
+                <p className="mx-auto mb-8 max-w-lg text-[#8b8fa3]">
                 Join thousands of creators using AI voice technology. Start
                 recording your voice today and see the magic.
               </p>
@@ -285,6 +301,7 @@ export default function Home() {
               </Link>
             </div>
           </div>
+        </ScrollReveal>
         </div>
       </section>
 

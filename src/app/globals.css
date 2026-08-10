@@ -409,3 +409,253 @@ body {
 .animate-spin-slow {
   animation: spin-slow 8s linear infinite;
 }
+
+/* ─── Scroll Reveal Animations ─── */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes reveal-left {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes reveal-right {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes reveal-scale {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.reveal {
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.reveal-up { transform: translateY(40px); }
+.reveal.reveal-left { transform: translateX(-40px); }
+.reveal.reveal-right { transform: translateX(40px); }
+.reveal.reveal-scale { transform: scale(0.9); }
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0) translateX(0) scale(1);
+}
+
+/* Stagger children */
+.reveal-stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
+.reveal-stagger > .reveal:nth-child(2) { transition-delay: 80ms; }
+.reveal-stagger > .reveal:nth-child(3) { transition-delay: 160ms; }
+.reveal-stagger > .reveal:nth-child(4) { transition-delay: 240ms; }
+.reveal-stagger > .reveal:nth-child(5) { transition-delay: 320ms; }
+.reveal-stagger > .reveal:nth-child(6) { transition-delay: 400ms; }
+
+/* ─── Floating Ambient Orbs ─── */
+@keyframes float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-10px, -40px) scale(0.95); }
+  75% { transform: translate(-30px, -10px) scale(1.02); }
+}
+
+@keyframes float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-40px, 20px) scale(1.08); }
+  66% { transform: translate(20px, -30px) scale(0.92); }
+}
+
+@keyframes float-3 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, 30px); }
+}
+
+.animate-float-1 { animation: float-1 20s ease-in-out infinite; }
+.animate-float-2 { animation: float-2 25s ease-in-out infinite; }
+.animate-float-3 { animation: float-3 15s ease-in-out infinite; }
+
+/* ─── Card Hover Tilt ─── */
+.card-tilt {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.card-tilt:hover {
+  transform: translateY(-4px) rotateX(2deg) rotateY(-2deg);
+  box-shadow: 0 20px 60px -15px rgba(99, 102, 241, 0.15), 0 8px 24px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Button Micro-interactions ─── */
+.btn-press {
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* ─── Gradient Text Shimmer ─── */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-text-animated {
+  background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc, #818cf8);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* ─── Typing Cursor ─── */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typing-cursor::after {
+  content: "|";
+  color: #6366f1;
+  animation: blink-cursor 1s step-end infinite;
+  margin-left: 2px;
+}
+
+/* ─── Ripple Effect ─── */
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-container .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.3);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+/* ─── Glow Border Animation ─── */
+@keyframes glow-border-rotate {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+.glow-border {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--angle, 0deg), #6366f1, #8b5cf6, #22d3ee, #6366f1);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: glow-border-rotate 4s linear infinite;
+  pointer-events: none;
+}
+
+.glow-border:hover::before {
+  opacity: 1;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ─── Smooth Accordion ─── */
+.accordion-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accordion-content.open {
+  grid-template-rows: 1fr;
+}
+
+.accordion-content > div {
+  overflow: hidden;
+}
+
+/* ─── Pulse Ring ─── */
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.pulse-ring::before,
+.pulse-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: pulse-ring 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.pulse-ring::after {
+  animation-delay: 0.5s;
+}
+
+/* ─── Stagger Fade In ─── */
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-children > * {
+  opacity: 0;
+  animation: stagger-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* ─── Wave Line Animation ─── */
+@keyframes wave-line {
+  0% { d: path("M0,20 Q25,5 50,20 T100,20"); }
+  50% { d: path("M0,20 Q25,35 50,20 T100,20"); }
+  100% { d: path("M0,20 Q25,5 50,20 T100,20"); }
+}
+
+/* ─── Loading Skeleton ─── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
