@@ -132,8 +132,7 @@ export function AudioPlayer({
       onTimeUpdate?.(audio.currentTime);
     };
     const onLoadedMeta = () => {
-      const d = audio.duration;
-      setDuration(Number.isFinite(d) && d > 0 ? d : 0);
+      setDuration(audio.duration);
       setIsLoading(false);
     };
     const onEndHandler = () => {
