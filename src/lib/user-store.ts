@@ -1,14 +1,12 @@
 import type { User } from "@/types/user";
 
 /**
- * In-memory user store using globalThis for Vercel serverless persistence.
+ * Shared in-memory user store for development.
  *
- * globalThis persists across warm invocations of the same serverless function.
- * On cold starts, data is lost — in production, replace with a real database.
+ * IMPORTANT: This data is lost on server restart.
+ * In production, replace with a real database.
  */
-const g = globalThis as typeof globalThis & { __voxcloneUsers?: User[] };
-if (!g.__voxcloneUsers) g.__voxcloneUsers = [];
-const users = g.__voxcloneUsers;
+const users: User[] = [];
 
 export function getUserByEmail(email: string): User | undefined {
   return users.find((u) => u.email.toLowerCase() === email.toLowerCase());
