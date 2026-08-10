@@ -47,6 +47,7 @@ export interface AddSampleRequest {
   mimeType: string;
   duration: number;
   source: "recording" | "upload";
+  audioData?: string;
 }
 
 export interface VoiceRecording {

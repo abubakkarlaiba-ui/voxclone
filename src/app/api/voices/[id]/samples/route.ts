@@ -96,7 +96,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { filename, size, mimeType, duration, source } = body as AddSampleRequest;
+    const { filename, size, mimeType, duration, source, audioData } = body as AddSampleRequest;
 
     if (!filename || typeof filename !== "string" || filename.trim().length === 0) {
       return NextResponse.json(
@@ -146,7 +146,7 @@ export async function POST(
     const sample: VoiceSample = {
       id: crypto.randomUUID(),
       filename: filename.trim(),
-      url: "",
+      url: audioData || "",
       blob: null,
       duration,
       size: size || 0,

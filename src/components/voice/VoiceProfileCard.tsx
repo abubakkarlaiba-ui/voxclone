@@ -55,6 +55,7 @@ export function VoiceProfileCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(profile.name);
   const [isSaving, setIsSaving] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -112,6 +113,24 @@ export function VoiceProfileCard({
   const handleSelect = useCallback(() => {
     onSelect?.(profile.id);
   }, [profile.id, onSelect]);
+
+  const handleProcess = useCallback(async () => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`/api/voices/${profile.id}/process`, { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        addNotification("success", "Voice processed and ready for TTS!");
+        window.location.reload();
+      } else {
+        addNotification("error", data.error?.message || "Processing failed");
+      }
+    } catch {
+      addNotification("error", "Failed to process voice.");
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [profile.id, addNotification]);
 
   return (
     <>
@@ -229,6 +248,19 @@ export function VoiceProfileCard({
 
           {/* Actions */}
           <div className="mt-auto flex gap-2" onClick={(e) => e.stopPropagation()}>
+            {(profile.status === "draft" || profile.status === "failed") && profile.samples.length > 0 && (
+              <Button
+                size="sm"
+                isLoading={isProcessing}
+                onClick={handleProcess}
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Process
+              </Button>
+            )}
             {isSelected ? (
               <Button size="sm" disabled>
                 <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">

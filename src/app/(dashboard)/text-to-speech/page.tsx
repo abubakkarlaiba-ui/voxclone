@@ -185,7 +185,7 @@ export default function TextToSpeechPage() {
         ]);
         if (!active) return;
         if (voicesData.success) {
-          const ready = voicesData.data.filter((v: VoiceProfile) => v.status === "ready");
+          const ready = voicesData.data.filter((v: VoiceProfile) => v.status === "ready" || (v.samples && v.samples.length > 0));
           setVoices(ready);
           if (ready.length > 0) setSelectedVoiceId(ready[0].id);
         } else {

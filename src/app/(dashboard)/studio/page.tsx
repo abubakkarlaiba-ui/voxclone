@@ -68,6 +68,12 @@ export default function StudioPage() {
       }
       const profile: VoiceProfile = data.data;
 
+      const audioBuffer = await recorder.recording.blob.arrayBuffer();
+      const audioBase64 = btoa(
+        new Uint8Array(audioBuffer).reduce((s, b) => s + String.fromCharCode(b), "")
+      );
+      const audioDataUrl = `data:${recorder.recording.blob.type};base64,${audioBase64}`;
+
       const sampleRes = await fetch(`/api/voices/${profile.id}/samples`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -77,6 +83,7 @@ export default function StudioPage() {
           mimeType: recorder.recording.blob.type,
           duration: recorder.recording.duration,
           source: "recording",
+          audioData: audioDataUrl,
         }),
       });
       const sampleData = await sampleRes.json();
@@ -87,8 +94,19 @@ export default function StudioPage() {
 
       profile.samples = [sampleData.data];
       profile.totalDuration = sampleData.data.duration;
+
+      addNotification("info", "Processing voice...");
+      const processRes = await fetch(`/api/voices/${profile.id}/process`, { method: "POST" });
+      const processData = await processRes.json();
+      if (processData.success) {
+        profile.status = processData.data.status;
+        profile.providerVoiceId = processData.data.providerVoiceId;
+        addNotification("success", "Voice processed and ready for TTS!");
+      } else {
+        addNotification("warning", processData.error?.message || "Processing failed. You can retry from the Library.");
+      }
+
       setSavedProfile(profile);
-      addNotification("success", "Voice profile saved!");
     } catch {
       addNotification("error", "Failed to save voice profile.");
     } finally {
@@ -130,13 +148,19 @@ export default function StudioPage() {
             </div>
             <h2 className="mb-2 text-xl font-bold text-text-primary">Voice Saved</h2>
             <p className="mb-8 text-center text-sm text-text-secondary">
-              &quot;{savedProfile.name}&quot; has been saved. You can now use it for text-to-speech.
+              &quot;{savedProfile.name}&quot; has been saved{savedProfile.status === "ready" ? " and processed" : ""}. {savedProfile.status === "ready" ? "You can now use it for text-to-speech." : "You can retry processing from the Library."}
             </p>
             <div className="flex gap-3">
               <Button onClick={() => { setSavedProfile(null); }}>Record Another</Button>
-              <Button variant="outline" onClick={() => router.push("/library")}>
-                Go to Library
-              </Button>
+              {savedProfile.status === "ready" ? (
+                <Button variant="outline" onClick={() => router.push("/text-to-speech")}>
+                  Go to Text-to-Speech
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={() => router.push("/library")}>
+                  Go to Library
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
