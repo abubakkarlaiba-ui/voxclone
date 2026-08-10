@@ -32,7 +32,6 @@ export function Card({ children, className, variant = "default", padding = "md",
         "rounded-xl transition-all duration-200",
         variantStyles[variant],
         paddingStyles[padding],
-        onClick && "cursor-pointer card-hover",
         className
       )}
       onClick={onClick}

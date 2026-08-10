@@ -100,7 +100,7 @@ export default function HistoryPage() {
   const totalPages = data?.totalPages ?? 0;
 
   return (
-    <div className="py-8 page-enter">
+    <div className="py-8">
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>

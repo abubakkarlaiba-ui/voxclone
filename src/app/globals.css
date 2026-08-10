@@ -111,8 +111,6 @@ body {
   color: var(--text-primary);
 }
 
-/* ─── Keyframes ─── */
-
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -153,47 +151,12 @@ body {
   100% { background-position: 200% 0; }
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  15%, 45%, 75% { transform: translateX(-4px); }
-  30%, 60%, 90% { transform: translateX(4px); }
-}
-
-@keyframes check-pop {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes processing-dots {
-  0%, 20% { opacity: 0.3; }
-  50% { opacity: 1; }
-  80%, 100% { opacity: 0.3; }
-}
-
-@keyframes waveform-bar {
-  0%, 100% { transform: scaleY(0.4); }
-  50% { transform: scaleY(1); }
-}
-
-@keyframes progress-indeterminate {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(400%); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-/* ─── Animation Classes ─── */
-
 .animate-fade-in {
-  animation: fade-in 0.25s ease-out forwards;
+  animation: fade-in 0.3s ease-out forwards;
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.35s ease-out forwards;
+  animation: fade-in-up 0.4s ease-out forwards;
 }
 
 .animate-slide-in-left {
@@ -227,128 +190,6 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
-.animate-shake {
-  animation: shake 0.4s ease-out;
-}
-
-.animate-check-pop {
-  animation: check-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-processing-dots span:nth-child(1) { animation: processing-dots 1.2s 0s infinite; }
-.animate-processing-dots span:nth-child(2) { animation: processing-dots 1.2s 0.2s infinite; }
-.animate-processing-dots span:nth-child(3) { animation: processing-dots 1.2s 0.4s infinite; }
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* ─── Page Transition ─── */
-
-.page-enter {
-  animation: fade-in 0.3s ease-out;
-}
-
-/* ─── Card Hover ─── */
-
-.card-hover {
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
-}
-
-.card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-/* ─── Button Polish ─── */
-
-.btn-transition {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ─── Skeleton Loader ─── */
-
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-}
-
-.skeleton::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(63, 63, 70, 0.15) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* ─── Indeterminate Progress ─── */
-
-.progress-bar {
-  position: relative;
-  height: 3px;
-  overflow: hidden;
-  background: var(--bg-tertiary);
-  border-radius: 2px;
-}
-
-.progress-bar::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 25%;
-  background: var(--accent-gradient);
-  border-radius: 2px;
-  animation: progress-indeterminate 1.5s ease-in-out infinite;
-}
-
-/* ─── Processing Indicator ─── */
-
-.processing-dots {
-  display: inline-flex;
-  gap: 3px;
-  align-items: center;
-}
-
-.processing-dots span {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--accent-primary);
-}
-
-/* ─── Waveform Bars ─── */
-
-.waveform-bars {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  height: 16px;
-}
-
-.waveform-bars span {
-  width: 2px;
-  height: 100%;
-  background: var(--accent-primary);
-  border-radius: 1px;
-  animation: waveform-bar 0.8s ease-in-out infinite;
-}
-
-.waveform-bars span:nth-child(1) { animation-delay: 0s; }
-.waveform-bars span:nth-child(2) { animation-delay: 0.1s; }
-.waveform-bars span:nth-child(3) { animation-delay: 0.2s; }
-.waveform-bars span:nth-child(4) { animation-delay: 0.3s; }
-.waveform-bars span:nth-child(5) { animation-delay: 0.4s; }
-
-/* ─── Glass ─── */
-
 .glass {
   background: rgba(24, 24, 27, 0.6);
   backdrop-filter: blur(16px);
@@ -377,37 +218,4 @@ body {
 .input-focus-ring:focus {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-/* ─── Reduced Motion ─── */
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  .animate-fade-in,
-  .animate-fade-in-up,
-  .animate-slide-in-left,
-  .animate-slide-in-right,
-  .animate-scale-in,
-  .animate-pulse-soft,
-  .animate-recording-pulse,
-  .animate-shimmer,
-  .animate-shake,
-  .animate-check-pop,
-  .animate-processing-dots,
-  .animate-float,
-  .page-enter,
-  .card-hover:hover,
-  .progress-bar::after,
-  .skeleton::after {
-    animation: none !important;
-    transform: none !important;
-  }
 }

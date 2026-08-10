@@ -53,8 +53,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center font-medium",
-        "transition-all duration-200 cubic-bezier(0.4, 0, 0.2, 1)",
+        "inline-flex items-center justify-center font-medium transition-all duration-200 ease-out",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary",
         "disabled:cursor-not-allowed disabled:opacity-40",
         "active:scale-[0.98]",

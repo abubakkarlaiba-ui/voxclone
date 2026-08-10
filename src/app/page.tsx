@@ -82,7 +82,7 @@ const steps = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-bg-primary page-enter">
+    <div className="min-h-screen bg-bg-primary">
       <LandingHeader />
 
       {/* Hero Section */}

@@ -75,7 +75,7 @@ export default function SettingsPage() {
     .slice(0, 2);
 
   return (
-    <div className="mx-auto max-w-2xl py-8 page-enter">
+    <div className="mx-auto max-w-2xl py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-text-primary">Profile & Settings</h1>
         <p className="mt-1 text-sm text-text-secondary">Manage your account settings.</p>
