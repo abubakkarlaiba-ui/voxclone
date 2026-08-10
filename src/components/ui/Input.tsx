@@ -40,11 +40,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              "block w-full rounded-lg border bg-bg-tertiary px-3 py-2 text-sm text-text-primary placeholder-text-muted transition-all duration-200",
+              "block w-full rounded-lg border bg-bg-secondary/50 px-3 py-2 text-sm text-text-primary placeholder-text-muted transition-all duration-200",
               "input-focus-ring",
               error
                 ? "border-error/50 focus:border-error focus:ring-error/10"
-                : "border-border-primary hover:border-border-secondary",
+                : "border-border-primary/60 hover:border-border-secondary",
               "disabled:cursor-not-allowed disabled:opacity-50",
               leftIcon && "pl-10",
               rightIcon && "pr-10",
@@ -103,11 +103,11 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={textareaId}
           className={cn(
-            "block w-full rounded-lg border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary placeholder-text-muted transition-all duration-200 resize-none",
+            "block w-full rounded-lg border bg-bg-secondary/50 px-3 py-2.5 text-sm text-text-primary placeholder-text-muted transition-all duration-200 resize-none",
             "input-focus-ring",
             error
               ? "border-error/50 focus:border-error focus:ring-error/10"
-              : "border-border-primary hover:border-border-secondary",
+              : "border-border-primary/60 hover:border-border-secondary",
             "disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}

@@ -11,11 +11,11 @@ interface CardProps {
 
 const variantStyles = {
   default:
-    "bg-bg-card border border-border-primary",
+    "bg-bg-card border border-border-primary shadow-sm",
   glass:
     "glass",
   elevated:
-    "bg-bg-tertiary border border-border-secondary shadow-lg",
+    "bg-bg-elevated border border-border-secondary shadow-lg",
 };
 
 const paddingStyles = {

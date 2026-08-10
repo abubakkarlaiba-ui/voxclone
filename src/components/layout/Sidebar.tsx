@@ -60,7 +60,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border-primary bg-bg-secondary transition-transform duration-300",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border-primary/50 bg-bg-secondary/80 backdrop-blur-xl transition-transform duration-300",
           "lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
@@ -81,7 +81,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   className={cn(
                     "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-accent-primary/10 text-accent-primary"
+                      ? "bg-accent-primary/10 text-accent-primary shadow-[inset_0_0_20px_rgba(99,102,241,0.06)]"
                       : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                   )}
                 >
