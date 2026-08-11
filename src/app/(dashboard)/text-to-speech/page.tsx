@@ -1,18 +1,24 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { ErrorState } from "@/components/ui/ErrorState";
 import { useNotification } from "@/hooks";
 import { NotificationContainer } from "@/components/ui/Notification";
 import { cn, formatDuration } from "@/lib/utils";
-import { getLanguageFlag, getInitials } from "@/lib/flags";
-import type { VoiceProfile, GeneratedAudio, GenerateOptions, ProviderCapabilities } from "@/types";
 
+/* ─── Constants ─── */
 const TEXT_LIMITS = { min: 1, max: 5000 } as const;
+const SPEED_OPTIONS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0] as const;
+
+interface KokoroVoice {
+  id: string;
+  name: string;
+  language: string;
+  languageCode: string;
+  gender: "male" | "female" | "neutral";
+  description: string;
+}
 
 function generateFilename(text: string) {
   const slug = text
@@ -20,27 +26,39 @@ function generateFilename(text: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  return `voxclone-${slug || "speech"}-${Date.now()}`;
+  return `kokoro-generated-voice-${slug || "speech"}-${Date.now()}`;
 }
+
+const LANG_FLAGS: Record<string, string> = {
+  en: "\u{1F1FA}\u{1F1F8}",
+  ja: "\u{1F1EF}\u{1F1F5}",
+  zh: "\u{1F1E8}\u{1F1F3}",
+  es: "\u{1F1EA}\u{1F1F8}",
+  fr: "\u{1F1EB}\u{1F1F7}",
+  hi: "\u{1F1EE}\u{1F1F3}",
+  it: "\u{1F1EE}\u{1F1F9}",
+  pt: "\u{1F1F5}\u{1F1F9}",
+  ko: "\u{1F1F0}\u{1F1F7}",
+};
+
+const GENDER_ICONS: Record<string, string> = {
+  male: "\u2642",
+  female: "\u2640",
+  neutral: "\u2022",
+};
 
 /* ─── Voice Pill Tab ─── */
 function VoicePill({
   voice,
   isSelected,
-  flag,
   onSelect,
-  onPreview,
-  isPreviewPlaying,
 }: {
-  voice: VoiceProfile;
+  voice: KokoroVoice;
   isSelected: boolean;
-  flag: string;
   onSelect: () => void;
-  onPreview: (url: string) => void;
-  isPreviewPlaying: boolean;
 }) {
-  const initials = getInitials(voice.name);
-  const sampleUrl = voice.samples?.[0]?.url;
+  const flag = LANG_FLAGS[voice.languageCode] || "\u{1F310}";
+  const genderIcon = GENDER_ICONS[voice.gender] || "";
 
   return (
     <button
@@ -53,96 +71,114 @@ function VoicePill({
       )}
     >
       <div className="relative flex-shrink-0">
-        <div className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold",
-          isSelected
-            ? "bg-accent-primary/20 text-accent-primary"
-            : "bg-bg-elevated text-text-muted"
-        )}>
-          {initials}
+        <div
+          className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold",
+            isSelected
+              ? "bg-accent-primary/20 text-accent-primary"
+              : "bg-bg-elevated text-text-muted"
+          )}
+        >
+          {voice.name.charAt(0)}
         </div>
-        <span className="absolute -bottom-0.5 -right-0.5 text-xs leading-none">{flag}</span>
+        <span className="absolute -bottom-0.5 -right-0.5 text-xs leading-none">
+          {flag}
+        </span>
       </div>
 
       <div className="text-left min-w-0">
-        <p className={cn(
-          "text-sm font-medium truncate max-w-[120px]",
-          isSelected ? "text-text-primary" : "text-text-secondary"
-        )}>
+        <p
+          className={cn(
+            "text-sm font-medium truncate max-w-[120px]",
+            isSelected ? "text-text-primary" : "text-text-secondary"
+          )}
+        >
           {voice.name}
         </p>
         <p className="text-[10px] text-text-muted">
-          {voice.samples.length} sample{voice.samples.length !== 1 ? "s" : ""}
+          {voice.language} {genderIcon}
         </p>
       </div>
 
       {isSelected && (
-        <svg className="h-4 w-4 flex-shrink-0 text-accent-primary" fill="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="h-4 w-4 flex-shrink-0 text-accent-primary"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
         </svg>
-      )}
-
-      {sampleUrl && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onPreview(sampleUrl); }}
-          className={cn(
-            "ml-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-all",
-            isPreviewPlaying
-              ? "bg-accent-primary text-white"
-              : "bg-bg-elevated text-text-muted hover:bg-accent-primary/20 hover:text-accent-primary"
-          )}
-          aria-label={`Preview ${voice.name}`}
-        >
-          {isPreviewPlaying ? (
-            <svg className="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-            </svg>
-          ) : (
-            <svg className="h-2.5 w-2.5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          )}
-        </button>
       )}
     </button>
   );
 }
 
+/* ─── Speed Selector ─── */
+function SpeedSelector({
+  speed,
+  onSpeedChange,
+}: {
+  speed: number;
+  onSpeedChange: (s: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      {SPEED_OPTIONS.map((s) => (
+        <button
+          key={s}
+          onClick={() => onSpeedChange(s)}
+          className={cn(
+            "pill-badge tabular-nums transition-all",
+            speed === s
+              ? "pill-badge-accent"
+              : "hover:bg-bg-elevated"
+          )}
+        >
+          {s}x
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /* ─── Bottom Sticky Audio Bar ─── */
 function StickyAudioBar({
-  audio,
+  audioUrl,
+  audioBlob,
+  text,
   isGenerating,
   onRegenerate,
   speed,
   onSpeedChange,
+  fileName,
 }: {
-  audio: GeneratedAudio | null;
+  audioUrl: string | null;
+  audioBlob: Blob | null;
+  text: string;
   isGenerating: boolean;
   onRegenerate: () => void;
   speed: number;
   onSpeedChange: (s: number) => void;
+  fileName: string;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [bars, setBars] = useState<number[]>([]);
-  const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.playbackRate = speed;
-  }, [speed]);
-
-  useEffect(() => {
-    if (!audio) {
+    if (!audioUrl) {
       setIsPlaying(false);
       setCurrentTime(0);
       setDuration(0);
-      setBars([]);
     }
-  }, [audio]);
+  }, [audioUrl]);
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.playbackRate = speed;
+  }, [speed]);
 
   useEffect(() => {
     const el = audioRef.current;
@@ -155,7 +191,10 @@ function StickyAudioBar({
       const d = el.duration;
       setDuration(Number.isFinite(d) && d > 0 ? d : 0);
     };
-    const onEnd = () => { setIsPlaying(false); setCurrentTime(0); };
+    const onEnd = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
 
     el.addEventListener("play", onPlay);
     el.addEventListener("pause", onPause);
@@ -169,7 +208,7 @@ function StickyAudioBar({
       el.removeEventListener("loadedmetadata", onMeta);
       el.removeEventListener("ended", onEnd);
     };
-  }, [audio]);
+  }, [audioUrl]);
 
   const togglePlay = useCallback(() => {
     const el = audioRef.current;
@@ -178,58 +217,77 @@ function StickyAudioBar({
     else el.play().catch(() => {});
   }, [isPlaying]);
 
-  const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const el = audioRef.current;
-    if (!el) return;
-    const t = Number(e.target.value);
-    el.currentTime = t;
-    setCurrentTime(t);
-  }, []);
-
-  const handleDownload = useCallback(() => {
-    if (!audio) return;
-    const a = document.createElement("a");
-    a.href = audio.audioUrl;
-    a.download = generateFilename(audio.text);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }, [audio]);
-
-  const cycleSpeed = useCallback(() => {
-    const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
-    const idx = speeds.indexOf(speed);
-    onSpeedChange(speeds[(idx + 1) % speeds.length]);
-  }, [speed, onSpeedChange]);
-
-  const staticBars = useMemo(
-    () => Array.from({ length: 24 }, (_, i) => 30 + Math.sin(i * 0.8) * 20 + Math.cos(i * 1.3) * 10),
+  const handleSeek = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const el = audioRef.current;
+      if (!el) return;
+      const t = Number(e.target.value);
+      el.currentTime = t;
+      setCurrentTime(t);
+    },
     []
   );
 
-  const displayBars = isPlaying ? bars : staticBars;
+  const handleDownload = useCallback(() => {
+    if (!audioUrl || !audioBlob) return;
+    const ext = audioBlob.type.includes("wav") ? "wav" : "mp3";
+    const name = fileName || `kokoro-generated-voice.${ext}`;
+    const a = document.createElement("a");
+    a.href = audioUrl;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, [audioUrl, audioBlob, fileName]);
+
+  const cycleSpeed = useCallback(() => {
+    const idx = SPEED_OPTIONS.indexOf(speed as (typeof SPEED_OPTIONS)[number]);
+    onSpeedChange(SPEED_OPTIONS[(idx + 1) % SPEED_OPTIONS.length]);
+  }, [speed, onSpeedChange]);
+
+  const staticBars = useMemo(
+    () =>
+      Array.from(
+        { length: 24 },
+        (_, i) => 30 + Math.sin(i * 0.8) * 20 + Math.cos(i * 1.3) * 10
+      ),
+    []
+  );
 
   return (
-    <div className={cn(
-      "fixed bottom-0 left-0 right-0 z-50 transition-all duration-500",
-      audio ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
-    )}>
+    <div
+      className={cn(
+        "fixed bottom-0 left-0 right-0 z-50 transition-all duration-500",
+        audioUrl
+          ? "translate-y-0 opacity-100"
+          : "translate-y-full opacity-0 pointer-events-none"
+      )}
+    >
       <div className="mx-auto max-w-4xl px-4 pb-4">
         <div className="eleven-card eleven-glow-bg flex items-center gap-4 px-5 py-3">
-          <audio ref={audioRef} src={audio?.audioUrl} preload="metadata" />
+          <audio ref={audioRef} src={audioUrl || undefined} preload="metadata" />
 
           {/* Mini waveform bars */}
-          <div className="hidden sm:flex items-end gap-[2px] h-8" aria-hidden="true">
-            {displayBars.map((v, i) => {
-              const norm = isPlaying ? v / 255 : 0.3 + Math.sin(i * 0.4) * 0.1;
+          <div
+            className="hidden sm:flex items-end gap-[2px] h-8"
+            aria-hidden="true"
+          >
+            {staticBars.map((v, i) => {
+              const norm = isPlaying
+                ? 0.3 + Math.sin(Date.now() * 0.01 + i * 0.8) * 0.3
+                : 0.3 + Math.sin(i * 0.4) * 0.1;
               return (
                 <div
                   key={i}
                   className={cn(
                     "w-[3px] rounded-full transition-[height] duration-75",
-                    isPlaying && norm > 0.5 ? "bg-accent-primary" : "bg-accent-primary/40"
+                    isPlaying && norm > 0.5
+                      ? "bg-accent-primary"
+                      : "bg-accent-primary/40"
                   )}
-                  style={{ height: `${Math.max(2, norm * 32)}px` }}
+                  style={{
+                    height: `${Math.max(2, norm * 32)}px`,
+                  }}
                 />
               );
             })}
@@ -246,7 +304,11 @@ function StickyAudioBar({
                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
               </svg>
             ) : (
-              <svg className="ml-0.5 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="ml-0.5 h-4 w-4"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M8 5v14l11-7z" />
               </svg>
             )}
@@ -274,7 +336,7 @@ function StickyAudioBar({
 
           {/* Text preview */}
           <p className="hidden md:block text-xs text-text-muted truncate max-w-[180px]">
-            {audio?.text}
+            {text}
           </p>
 
           {/* Speed pill */}
@@ -293,8 +355,18 @@ function StickyAudioBar({
             className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-primary disabled:opacity-40"
             aria-label="Regenerate"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
           </button>
 
@@ -304,8 +376,18 @@ function StickyAudioBar({
             className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-primary"
             aria-label="Download"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
             </svg>
           </button>
         </div>
@@ -316,129 +398,181 @@ function StickyAudioBar({
 
 /* ─── Main Page ─── */
 export default function TextToSpeechPage() {
-  const router = useRouter();
-  const { notifications, addNotification, removeNotification } = useNotification();
+  const { notifications, addNotification, removeNotification } =
+    useNotification();
 
-  const [voices, setVoices] = useState<VoiceProfile[]>([]);
+  const [voices, setVoices] = useState<KokoroVoice[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState("");
   const [text, setText] = useState("");
-  const [capabilities, setCapabilities] = useState<ProviderCapabilities | null>(null);
-  const [options, setOptions] = useState<GenerateOptions>({});
-  const [generatedAudio, setGeneratedAudio] = useState<GeneratedAudio | null>(null);
+  const [speed, setSpeed] = useState(1.0);
+  const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(
+    null
+  );
+  const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
+  const [generatedText, setGeneratedText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showControls, setShowControls] = useState(false);
-  const [previewVoiceId, setPreviewVoiceId] = useState<string | null>(null);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [voiceSearch, setVoiceSearch] = useState("");
+  const [selectedLang, setSelectedLang] = useState<string | null>(null);
 
+  const objectUrlRef = useRef<string | null>(null);
+
+  // Load voices from static data
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const [voicesRes, capsRes] = await Promise.all([
-          fetch("/api/voices"),
-          fetch("/api/capabilities"),
-        ]);
-        const [voicesData, capsData] = await Promise.all([
-          voicesRes.json(),
-          capsRes.json(),
-        ]);
+        // Load voices from the static Kokoro voice definitions
+        const mod = await import("@/lib/kokoro/voices");
         if (!active) return;
-        if (voicesData.success) {
-          const ready = voicesData.data.filter((v: VoiceProfile) => v.status === "ready" || (v.samples && v.samples.length > 0));
-          setVoices(ready);
-          if (ready.length > 0) setSelectedVoiceId(ready[0].id);
-        } else {
-          setError(voicesData.error?.message || "Failed to load voices");
-        }
-        if (capsData.success) {
-          setCapabilities(capsData.data);
-          const c = capsData.data.controls;
-          setOptions({
-            speed: c.speed.default,
-            stability: c.stability.default,
-            similarityBoost: c.similarityBoost.default,
-            style: c.style.default,
-            useSpeakerBoost: c.speakerBoost.default,
-            language: c.languages[0]?.code,
-            format: "mp3",
-          });
+        setVoices(mod.KOKORO_VOICES);
+        if (mod.KOKORO_VOICES.length > 0) {
+          setSelectedVoiceId(mod.KOKORO_VOICES[0].id);
         }
       } catch {
-        if (active) setError("Failed to load data.");
+        if (active) setError("Failed to load voices.");
       } finally {
         if (active) setIsLoading(false);
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const selectedVoice = voices.find((v) => v.id === selectedVoiceId);
+  // Cleanup object URL on unmount
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+    };
+  }, []);
+
+  const selectedVoice = useMemo(
+    () => voices.find((v) => v.id === selectedVoiceId),
+    [voices, selectedVoiceId]
+  );
+
+  const languages = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const v of voices) {
+      if (!map.has(v.languageCode)) map.set(v.languageCode, v.language);
+    }
+    return Array.from(map.entries()).map(([code, name]) => ({
+      code,
+      name,
+      flag: LANG_FLAGS[code] || "\u{1F310}",
+    }));
+  }, [voices]);
+
+  const filteredVoices = useMemo(() => {
+    let list = voices;
+    if (selectedLang) {
+      list = list.filter((v) => v.languageCode === selectedLang);
+    }
+    if (voiceSearch.trim()) {
+      const q = voiceSearch.toLowerCase();
+      list = list.filter(
+        (v) =>
+          v.name.toLowerCase().includes(q) ||
+          v.language.toLowerCase().includes(q) ||
+          v.description.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [voices, selectedLang, voiceSearch]);
 
   const textError = useMemo(() => {
     const trimmed = text.trim();
     if (trimmed.length === 0) return null;
-    if (trimmed.length < TEXT_LIMITS.min) return `Text must be at least ${TEXT_LIMITS.min} character`;
-    if (trimmed.length > TEXT_LIMITS.max) return `Text exceeds ${TEXT_LIMITS.max} character limit`;
+    if (trimmed.length < TEXT_LIMITS.min)
+      return `Text must be at least ${TEXT_LIMITS.min} character`;
+    if (trimmed.length > TEXT_LIMITS.max)
+      return `Text exceeds ${TEXT_LIMITS.max} character limit`;
     return null;
   }, [text]);
 
-  const canGenerate = text.trim().length >= TEXT_LIMITS.min && text.trim().length <= TEXT_LIMITS.max && !textError && !!selectedVoiceId && !isGenerating;
-
-  const handleOptionChange = useCallback((key: keyof GenerateOptions, value: unknown) => {
-    setOptions((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  const canGenerate =
+    text.trim().length >= TEXT_LIMITS.min &&
+    text.trim().length <= TEXT_LIMITS.max &&
+    !textError &&
+    !!selectedVoiceId &&
+    !isGenerating;
 
   const handleGenerate = useCallback(async () => {
     if (!canGenerate) return;
     setIsGenerating(true);
-    setGeneratedAudio(null);
+
+    // Cleanup old URL
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+    setGeneratedAudioUrl(null);
+    setGeneratedBlob(null);
+
     try {
-      const res = await fetch("/api/generate", {
+      const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ voiceId: selectedVoiceId, text: text.trim(), options }),
+        body: JSON.stringify({
+          text: text.trim(),
+          voice: selectedVoiceId,
+          speed,
+          format: "mp3",
+        }),
       });
-      const data = await res.json();
-      if (data.success) {
-        setGeneratedAudio(data.data);
-        addNotification("success", "Speech generated successfully!");
-        const voiceName = voices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
-        fetch("/api/history", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            voiceId: selectedVoiceId, voiceName,
-            text: data.data.text, audioUrl: data.data.audioUrl,
-            duration: data.data.duration, format: options.format || "mp3", options,
-          }),
-        }).catch(() => {});
-      } else {
-        addNotification("error", data.error?.message || "Generation failed");
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        const msg =
+          errData?.error?.message ||
+          `Generation failed (${res.status}). Please try again.`;
+        addNotification("error", msg);
+        return;
       }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      objectUrlRef.current = url;
+
+      setGeneratedAudioUrl(url);
+      setGeneratedBlob(blob);
+      setGeneratedText(text.trim());
+      addNotification("success", "Speech generated successfully!");
+
+      // Save to history
+      const voiceName =
+        voices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
+      fetch("/api/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          voiceId: selectedVoiceId,
+          voiceName,
+          text: text.trim(),
+          audioUrl: "",
+          duration: 0,
+          format: "mp3",
+          options: { speed },
+        }),
+      }).catch(() => {});
     } catch {
-      addNotification("error", "Failed to generate speech. Please try again.");
+      addNotification(
+        "error",
+        "Failed to generate speech. Please try again."
+      );
     } finally {
       setIsGenerating(false);
     }
-  }, [canGenerate, selectedVoiceId, text, options, addNotification, voices]);
+  }, [canGenerate, selectedVoiceId, text, speed, addNotification, voices]);
 
-  const handleClearText = useCallback(() => { setText(""); setGeneratedAudio(null); }, []);
-
-  const insertPause = useCallback(() => {
-    const ta = document.querySelector<HTMLTextAreaElement>("[data-textarea]");
-    if (!ta) { setText((p) => p + " ... "); return; }
-    const start = ta.selectionStart;
-    const end = ta.selectionEnd;
-    const before = text.slice(0, start);
-    const after = text.slice(end);
-    setText(before + " ... " + after);
-  }, [text]);
-
-  const handlePreviewVoice = useCallback((sampleUrl: string) => {
-    const audio = new Audio(sampleUrl);
-    audio.play().catch(() => {});
+  const handleClearText = useCallback(() => {
+    setText("");
+    setGeneratedAudioUrl(null);
+    setGeneratedBlob(null);
   }, []);
 
   if (isLoading) {
@@ -452,64 +586,146 @@ export default function TextToSpeechPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-xl py-16">
-        <ErrorState message={error} onRetry={() => window.location.reload()} />
-      </div>
-    );
-  }
-
-  if (voices.length === 0) {
-    return (
-      <div className="mx-auto max-w-xl py-16">
-        <EmptyState
-          icon={
-            <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-            </svg>
-          }
-          title="No authorized voices yet"
-          description="Record and process a voice in the Studio to start generating speech."
-          action={<Button onClick={() => router.push("/studio")}>Go to Studio</Button>}
-        />
+        <div className="eleven-card p-8 text-center">
+          <p className="text-text-secondary mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={cn("mx-auto max-w-4xl py-8 pb-32", generatedAudio && "pb-40")}>
-      {/* ─── Top Voice Selection Bar ─── */}
+    <div
+      className={cn(
+        "mx-auto max-w-4xl py-8 pb-32",
+        generatedAudioUrl && "pb-40"
+      )}
+    >
+      {/* ─── Header ─── */}
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-text-secondary">Select Voice</h2>
-          {capabilities && capabilities.controls.languages.length > 1 && (
-            <select
-              value={options.language ?? ""}
-              onChange={(e) => handleOptionChange("language", e.target.value)}
-              className="rounded-lg border border-border-primary/60 bg-bg-secondary/50 px-2.5 py-1 text-xs text-text-secondary transition-colors hover:border-border-secondary focus:border-accent-primary focus:outline-none"
-            >
-              {capabilities.controls.languages.map((l) => (
-                <option key={l.code} value={l.code}>{getLanguageFlag(l.code)} {l.name}</option>
-              ))}
-            </select>
-          )}
+        <h1 className="text-2xl font-bold text-white mb-1">Text to Speech</h1>
+        <p className="text-sm text-[#8b8fa3]">
+          Convert your text to natural speech using Kokoro TTS
+        </p>
+      </div>
+
+      {/* ─── Language Filter ─── */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <h2 className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+            Language
+          </h2>
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-          {voices.map((voice) => (
-            <VoicePill
-              key={voice.id}
-              voice={voice}
-              isSelected={selectedVoiceId === voice.id}
-              flag={getLanguageFlag(options?.language)}
-              onSelect={() => setSelectedVoiceId(voice.id)}
-              onPreview={handlePreviewVoice}
-              isPreviewPlaying={previewVoiceId === voice.id}
-            />
+        <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-thin">
+          <button
+            onClick={() => setSelectedLang(null)}
+            className={cn(
+              "flex-shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
+              !selectedLang
+                ? "border-accent-primary/40 bg-accent-primary/10 text-accent-primary"
+                : "border-border-primary/60 bg-bg-secondary/50 text-text-secondary hover:border-border-secondary"
+            )}
+          >
+            All Languages
+          </button>
+          {languages.map((l) => (
+            <button
+              key={l.code}
+              onClick={() =>
+                setSelectedLang(selectedLang === l.code ? null : l.code)
+              }
+              className={cn(
+                "flex-shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
+                selectedLang === l.code
+                  ? "border-accent-primary/40 bg-accent-primary/10 text-accent-primary"
+                  : "border-border-primary/60 bg-bg-secondary/50 text-text-secondary hover:border-border-secondary"
+              )}
+            >
+              {l.flag} {l.name}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* ─── Text Generation Box ─── */}
+      {/* ─── Voice Search ─── */}
+      <div className="mb-4">
+        <div className="relative">
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search voices..."
+            value={voiceSearch}
+            onChange={(e) => setVoiceSearch(e.target.value)}
+            className="w-full rounded-lg border border-border-primary/60 bg-bg-secondary/50 pl-9 pr-4 py-2 text-sm text-text-primary placeholder-text-muted transition-colors hover:border-border-secondary focus:border-accent-primary focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {/* ─── Voice Selection ─── */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+            Select Voice
+          </h2>
+          <span className="text-[11px] text-text-muted">
+            {filteredVoices.length} voice{filteredVoices.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+          {filteredVoices.map((voice) => (
+            <VoicePill
+              key={voice.id}
+              voice={voice}
+              isSelected={selectedVoiceId === voice.id}
+              onSelect={() => setSelectedVoiceId(voice.id)}
+            />
+          ))}
+          {filteredVoices.length === 0 && (
+            <p className="text-sm text-text-muted py-4">
+              No voices found matching your search.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* ─── Selected Voice Info ─── */}
+      {selectedVoice && (
+        <div className="eleven-card mb-6 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-primary/10 text-accent-primary text-sm font-bold">
+              {selectedVoice.name.charAt(0)}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-text-primary">
+                {selectedVoice.name}
+              </p>
+              <p className="text-xs text-text-muted">
+                {LANG_FLAGS[selectedVoice.languageCode] || ""}{" "}
+                {selectedVoice.language} &middot;{" "}
+                {GENDER_ICONS[selectedVoice.gender]}{" "}
+                {selectedVoice.gender.charAt(0).toUpperCase() +
+                  selectedVoice.gender.slice(1)}{" "}
+                &middot; {selectedVoice.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Text Input ─── */}
       <div className="eleven-card mb-6 overflow-hidden">
-        {/* Textarea — borderless */}
         <textarea
           data-textarea
           placeholder="Type or paste your text here..."
@@ -521,37 +737,43 @@ export default function TextToSpeechPage() {
             textError && "placeholder:text-error/40"
           )}
         />
-
-        {/* Bottom bar inside card */}
         <div className="flex items-center justify-between border-t border-border-primary/40 px-5 py-2.5">
           <div className="flex items-center gap-3">
-            {/* Pause insertion button */}
             <button
-              onClick={insertPause}
+              onClick={() => setText((p) => p + " ... ")}
               className="pill-badge hover:bg-bg-elevated"
               title="Insert pause marker"
             >
-              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-3 w-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               Pause
             </button>
-
-            {selectedVoice && (
-              <span className="text-[11px] text-text-muted">
-                {selectedVoice.name}
-              </span>
-            )}
           </div>
-
           <div className="flex items-center gap-3">
             {textError && (
               <span className="text-[11px] text-error">{textError}</span>
             )}
-            <span className={cn(
-              "text-[11px] tabular-nums",
-              text.length > TEXT_LIMITS.max ? "text-error" : text.length > TEXT_LIMITS.max * 0.9 ? "text-warning" : "text-text-muted"
-            )}>
+            <span
+              className={cn(
+                "text-[11px] tabular-nums",
+                text.length > TEXT_LIMITS.max
+                  ? "text-error"
+                  : text.length > TEXT_LIMITS.max * 0.9
+                    ? "text-warning"
+                    : "text-text-muted"
+              )}
+            >
               {text.length.toLocaleString()} / {TEXT_LIMITS.max.toLocaleString()}
             </span>
             {text.length > 0 && (
@@ -566,26 +788,84 @@ export default function TextToSpeechPage() {
         </div>
       </div>
 
+      {/* ─── Speed Control ─── */}
+      <div className="eleven-card mb-6 px-5 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <svg
+              className="h-4 w-4 text-text-muted"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+            <span className="text-sm font-medium text-text-secondary">
+              Speed
+            </span>
+            <span className="pill-badge pill-badge-accent text-[10px] tabular-nums">
+              {speed}x
+            </span>
+          </div>
+        </div>
+        <SpeedSelector speed={speed} onSpeedChange={setSpeed} />
+      </div>
+
       {/* ─── Generate Button ─── */}
       <div className="relative mb-6 group eleven-glow-bg">
-        <div className={cn(
-          "absolute -inset-1 rounded-2xl transition-opacity duration-500",
-          canGenerate
-            ? "bg-gradient-to-r from-accent-primary/20 via-accent-secondary/20 to-accent-primary/20 opacity-100 blur-lg animate-glow-pulse"
-            : "opacity-0"
-        )} />
+        <div
+          className={cn(
+            "absolute -inset-1 rounded-2xl transition-opacity duration-500",
+            canGenerate
+              ? "bg-gradient-to-r from-accent-primary/20 via-accent-secondary/20 to-accent-primary/20 opacity-100 blur-lg animate-glow-pulse"
+              : "opacity-0"
+          )}
+        />
         {canGenerate && !isGenerating && (
-          <svg className="absolute -inset-2 h-[calc(100%+16px)] w-[calc(100%+16px)] animate-spin-slow" viewBox="0 0 200 50" preserveAspectRatio="none">
+          <svg
+            className="absolute -inset-2 h-[calc(100%+16px)] w-[calc(100%+16px)] animate-spin-slow"
+            viewBox="0 0 200 50"
+            preserveAspectRatio="none"
+          >
             <defs>
-              <linearGradient id="glow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient
+                id="glow-grad"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
                 <stop offset="0%" stopColor="transparent" />
-                <stop offset="30%" stopColor="rgba(99,102,241,0.4)" />
-                <stop offset="50%" stopColor="rgba(139,92,246,0.6)" />
-                <stop offset="70%" stopColor="rgba(99,102,241,0.4)" />
+                <stop
+                  offset="30%"
+                  stopColor="rgba(99,102,241,0.4)"
+                />
+                <stop
+                  offset="50%"
+                  stopColor="rgba(139,92,246,0.6)"
+                />
+                <stop
+                  offset="70%"
+                  stopColor="rgba(99,102,241,0.4)"
+                />
                 <stop offset="100%" stopColor="transparent" />
               </linearGradient>
             </defs>
-            <rect x="0" y="0" width="200" height="50" rx="25" fill="none" stroke="url(#glow-grad)" strokeWidth="1.5" />
+            <rect
+              x="0"
+              y="0"
+              width="200"
+              height="50"
+              rx="25"
+              fill="none"
+              stroke="url(#glow-grad)"
+              strokeWidth="1.5"
+            />
           </svg>
         )}
         <button
@@ -598,16 +878,41 @@ export default function TextToSpeechPage() {
         >
           {isGenerating ? (
             <>
-              <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              <svg
+                className="h-5 w-5 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
               </svg>
-              Generating Speech...
+              Generating voice...
             </>
           ) : (
             <>
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                />
               </svg>
               Generate Speech
             </>
@@ -615,121 +920,73 @@ export default function TextToSpeechPage() {
         </button>
       </div>
 
-      {/* ─── Voice Controls ─── */}
-      {capabilities && (
-        <div className="eleven-card mb-6 overflow-hidden">
-          <button
-            onClick={() => setShowControls(!showControls)}
-            className="flex w-full items-center justify-between px-5 py-3.5 text-left"
-          >
-            <div className="flex items-center gap-2.5">
-              <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-              <span className="text-sm font-medium text-text-secondary">Voice Controls</span>
-              {capabilities.provider !== "mock" && (
-                <span className="pill-badge pill-badge-accent text-[10px]">{capabilities.provider}</span>
-              )}
-            </div>
-            <svg
-              className={cn("h-4 w-4 text-text-muted transition-transform", showControls && "rotate-180")}
-              fill="none" viewBox="0 0 24 24" stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          {showControls && (
-            <div className="border-t border-border-primary/40 px-5 py-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                {(["speed", "stability", "similarityBoost", "style"] as const).map((key) => {
-                  const ctrl = capabilities.controls[key === "similarityBoost" ? "similarityBoost" : key];
-                  if (!ctrl) return null;
-                  const label = key === "similarityBoost" ? "Similarity" : key.charAt(0).toUpperCase() + key.slice(1);
-                  const val = options[key] ?? ctrl.default;
-                  return (
-                    <div key={key}>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-medium text-text-secondary">{label}</label>
-                        <span className="text-[10px] font-mono text-text-muted tabular-nums">{Number(val).toFixed(2)}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min={ctrl.min}
-                        max={ctrl.max}
-                        step={ctrl.step}
-                        value={Number(val)}
-                        onChange={(e) => handleOptionChange(key, Number(e.target.value))}
-                        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-primary accent-accent-primary"
-                        aria-label={label}
-                      />
-                    </div>
-                  );
-                })}
-
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-text-secondary">Speaker Boost</label>
-                  <button
-                    onClick={() => handleOptionChange("useSpeakerBoost", !options.useSpeakerBoost)}
-                    className={cn(
-                      "relative h-5 w-9 rounded-full transition-colors",
-                      options.useSpeakerBoost ? "bg-accent-primary" : "bg-border-primary"
-                    )}
-                    role="switch"
-                    aria-checked={!!options.useSpeakerBoost}
-                  >
-                    <span className={cn(
-                      "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
-                      options.useSpeakerBoost ? "translate-x-4" : "translate-x-0.5"
-                    )} />
-                  </button>
-                </div>
-
-                <div>
-                  <label className="text-xs font-medium text-text-secondary mb-1.5 block">Output Format</label>
-                  <select
-                    value={options.format ?? "mp3"}
-                    onChange={(e) => handleOptionChange("format", e.target.value)}
-                    className="w-full rounded-lg border border-border-primary/60 bg-bg-secondary/50 px-3 py-1.5 text-xs text-text-primary transition-colors hover:border-border-secondary focus:border-accent-primary focus:outline-none"
-                  >
-                    {capabilities.controls.formats.map((f: { value: string; label: string }) => (
-                      <option key={f.value} value={f.value}>{f.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* ─── Generating Progress ─── */}
       {isGenerating && (
         <div className="eleven-card mb-6 animate-fade-in-up">
           <div className="flex flex-col items-center py-12 text-center">
             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-accent-primary/10 animate-pulse-soft">
-              <svg className="h-8 w-8 animate-spin text-accent-primary" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              <svg
+                className="h-8 w-8 animate-spin text-accent-primary"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
               </svg>
             </div>
-            <h3 className="mb-1 text-lg font-semibold text-text-primary">Generating Speech</h3>
+            <h3 className="mb-1 text-lg font-semibold text-text-primary">
+              Generating Speech
+            </h3>
             <p className="text-sm text-text-secondary">
-              Converting your text using <span className="font-medium text-text-primary">{selectedVoice?.name}</span>...
+              Converting your text using{" "}
+              <span className="font-medium text-text-primary">
+                {selectedVoice?.name}
+              </span>
+              ...
             </p>
           </div>
         </div>
       )}
 
-      {/* ─── Inline result preview (above sticky bar) ─── */}
-      {generatedAudio && !isGenerating && (
+      {/* ─── Inline result preview ─── */}
+      {generatedAudioUrl && !isGenerating && (
         <div className="eleven-card eleven-glow-bg mb-6 animate-fade-in-up p-5">
-          <p className="text-xs text-text-muted mb-3">Generated with {selectedVoice?.name}</p>
-          <p className="text-sm italic text-text-secondary line-clamp-2 mb-3">&quot;{generatedAudio.text}&quot;</p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-text-muted">
+              Generated with {selectedVoice?.name} at {speed}x speed
+            </p>
+            <span className="pill-badge pill-badge-accent text-[10px]">
+              Kokoro TTS
+            </span>
+          </div>
+          <p className="text-sm italic text-text-secondary line-clamp-2 mb-3">
+            &quot;{generatedText}&quot;
+          </p>
           <div className="flex items-center gap-2">
             <Button onClick={handleGenerate} variant="secondary" size="sm">
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <svg
+                className="h-3.5 w-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
               </svg>
               Regenerate
             </Button>
@@ -739,14 +996,24 @@ export default function TextToSpeechPage() {
 
       {/* ─── Bottom Sticky Audio Bar ─── */}
       <StickyAudioBar
-        audio={generatedAudio}
+        audioUrl={generatedAudioUrl}
+        audioBlob={generatedBlob}
+        text={generatedText}
         isGenerating={isGenerating}
         onRegenerate={handleGenerate}
-        speed={playbackSpeed}
-        onSpeedChange={setPlaybackSpeed}
+        speed={speed}
+        onSpeedChange={setSpeed}
+        fileName={
+          generatedBlob
+            ? generateFilename(generatedText)
+            : "kokoro-generated-voice.mp3"
+        }
       />
 
-      <NotificationContainer notifications={notifications} onDismiss={removeNotification} />
+      <NotificationContainer
+        notifications={notifications}
+        onDismiss={removeNotification}
+      />
     </div>
   );
 }

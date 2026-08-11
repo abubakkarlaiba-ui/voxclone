@@ -66,6 +66,8 @@ export interface GeneratedAudio {
   duration: number;
   createdAt: string;
   status: GenerationStatus;
+  useClientTts?: boolean;
+  sampleAudioUrl?: string | null;
 }
 
 export type GenerationStatus = "pending" | "generating" | "completed" | "error";

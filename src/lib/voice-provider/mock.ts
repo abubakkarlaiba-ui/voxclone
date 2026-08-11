@@ -79,7 +79,7 @@ export class MockVoiceProvider implements VoiceProvider {
   async generateSpeech(
     request: GenerateSpeechRequest
   ): Promise<GenerateSpeechResponse> {
-    await this.simulateDelay(1000, 2500);
+    await this.simulateDelay(500, 1000);
 
     const wordCount = request.text.split(/\s+/).length;
     const speed = request.voiceSettings?.speed ?? 1;
@@ -91,6 +91,7 @@ export class MockVoiceProvider implements VoiceProvider {
       audioBuffer,
       contentType: "audio/wav",
       duration: estimatedDuration,
+      useClientTts: true,
     };
   }
 

@@ -3,7 +3,7 @@ import type { ApiResponse } from "@/types";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
 import { updateUser } from "@/lib/user-store";
 
-const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+const MAX_AVATAR_SIZE = 500 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 export async function POST(
@@ -67,7 +67,8 @@ export async function POST(
       data: { avatarUrl },
       timestamp: new Date().toISOString(),
     });
-  } catch {
+  } catch (err) {
+    console.error("Avatar upload error:", err);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to upload avatar" }, timestamp: new Date().toISOString() },
       { status: 500 }

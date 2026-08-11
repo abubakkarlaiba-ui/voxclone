@@ -28,6 +28,7 @@ export interface GenerateSpeechRequest {
   modelId?: string;
   voiceSettings?: VoiceSettings;
   outputFormat?: OutputFormat;
+  sampleAudioBase64?: string;
 }
 
 export interface VoiceSettings {
@@ -50,6 +51,7 @@ export interface GenerateSpeechResponse {
   audioBuffer: Buffer;
   contentType: string;
   duration: number;
+  useClientTts?: boolean;
 }
 
 export interface ProviderCapabilities {

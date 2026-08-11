@@ -120,6 +120,7 @@ export async function POST(
         useSpeakerBoost: options?.useSpeakerBoost ?? caps.controls.speakerBoost.default,
       },
       outputFormat: outputFormat as never,
+      sampleAudioBase64: profile.samples?.[0]?.url || undefined,
     });
 
     const audioBase64 = result.audioBuffer.toString("base64");
@@ -133,6 +134,8 @@ export async function POST(
       duration: result.duration,
       createdAt: new Date().toISOString(),
       status: "completed",
+      useClientTts: result.useClientTts || false,
+      sampleAudioUrl: profile.samples?.[0]?.url || null,
     };
 
     return NextResponse.json({

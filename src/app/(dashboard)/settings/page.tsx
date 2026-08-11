@@ -77,14 +77,54 @@ export default function SettingsPage() {
     }
   }, [user, editName, editEmail, addNotification, refresh]);
 
+  const compressImage = useCallback(async (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        let { width, height } = img;
+        const maxDim = 256;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height / width) * maxDim);
+            width = maxDim;
+          } else {
+            width = Math.round((width / height) * maxDim);
+            height = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        ctx?.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            URL.revokeObjectURL(url);
+            if (blob) {
+              resolve(new File([blob], file.name, { type: "image/jpeg", lastModified: Date.now() }));
+            } else {
+              resolve(file);
+            }
+          },
+          "image/jpeg",
+          0.7
+        );
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }, []);
+
   const handleAvatarUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploadingAvatar(true);
     try {
+      const compressed = await compressImage(file);
       const formData = new FormData();
-      formData.append("avatar", file);
+      formData.append("avatar", compressed);
 
       const res = await fetch("/api/auth/avatar", {
         method: "POST",
@@ -103,7 +143,7 @@ export default function SettingsPage() {
       setIsUploadingAvatar(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
-  }, [addNotification, refresh]);
+  }, [addNotification, refresh, compressImage]);
 
   const handleRemoveAvatar = useCallback(async () => {
     try {
