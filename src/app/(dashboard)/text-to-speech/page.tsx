@@ -415,15 +415,37 @@ export default function TextToSpeechPage() {
   const [error, setError] = useState<string | null>(null);
   const [voiceSearch, setVoiceSearch] = useState("");
   const [selectedLang, setSelectedLang] = useState<string | null>(null);
+  const [ttsEngine, setTtsEngine] = useState<"kokoro" | "browser" | null>(null);
+  const [isBrowserPlaying, setIsBrowserPlaying] = useState(false);
 
   const objectUrlRef = useRef<string | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Check Kokoro availability on mount
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: "ping", voice: "af_heart", speed: 1.0, format: "mp3" }),
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!active) return;
+        setTtsEngine(res.status === 502 || res.status === 503 || res.status === 504 || !res.ok ? "browser" : "kokoro");
+      } catch {
+        if (active) setTtsEngine("browser");
+      }
+    })();
+    return () => { active = false; };
+  }, []);
 
   // Load voices from static data
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        // Load voices from the static Kokoro voice definitions
         const mod = await import("@/lib/kokoro/voices");
         if (!active) return;
         setVoices(mod.KOKORO_VOICES);
@@ -441,12 +463,11 @@ export default function TextToSpeechPage() {
     };
   }, []);
 
-  // Cleanup object URL on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
-      }
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+      window.speechSynthesis?.cancel();
     };
   }, []);
 
@@ -512,65 +533,83 @@ export default function TextToSpeechPage() {
     setGeneratedAudioUrl(null);
     setGeneratedBlob(null);
 
-    try {
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: text.trim(),
-          voice: selectedVoiceId,
-          speed,
-          format: "mp3",
-        }),
-      });
+    const voiceName =
+      voices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
 
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        objectUrlRef.current = url;
-        setGeneratedAudioUrl(url);
-        setGeneratedBlob(blob);
-        setGeneratedText(text.trim());
-        addNotification("success", "Speech generated!");
-
-        const voiceName =
-          voices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
-        fetch("/api/history", {
+    // Try Kokoro first
+    if (ttsEngine === "kokoro" || ttsEngine === null) {
+      try {
+        const res = await fetch("/api/tts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            voiceId: selectedVoiceId,
-            voiceName,
             text: text.trim(),
-            audioUrl: "",
-            duration: 0,
+            voice: selectedVoiceId,
+            speed,
             format: "mp3",
-            options: { speed },
           }),
-        }).catch(() => {});
-        return;
-      }
+        });
 
-      const errData = await res.json().catch(() => null);
-      const errMsg = errData?.error?.message || `Kokoro server unavailable (${res.status})`;
-      console.warn("Kokoro TTS failed, using browser SpeechSynthesis:", errMsg);
-    } catch (err) {
-      console.warn("Kokoro TTS unreachable, using browser SpeechSynthesis:", err);
+        if (res.ok) {
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          objectUrlRef.current = url;
+          setGeneratedAudioUrl(url);
+          setGeneratedBlob(blob);
+          setGeneratedText(text.trim());
+          setTtsEngine("kokoro");
+          addNotification("success", "Speech generated with Kokoro!");
+
+          fetch("/api/history", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              voiceId: selectedVoiceId,
+              voiceName,
+              text: text.trim(),
+              audioUrl: "",
+              duration: 0,
+              format: "mp3",
+              options: { speed },
+            }),
+          }).catch(() => {});
+          setIsGenerating(false);
+          return;
+        }
+
+        setTtsEngine("browser");
+      } catch {
+        setTtsEngine("browser");
+      }
     }
 
+    // Browser SpeechSynthesis fallback
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      const voiceName =
-        voices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text.trim());
       utterance.rate = speed;
+      utteranceRef.current = utterance;
+
       const voicesList = window.speechSynthesis.getVoices();
-      const match = voicesList.find(
-        (v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("google")
-      ) || voicesList.find((v) => v.lang.startsWith("en"));
+      const match =
+        voicesList.find(
+          (v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("google")
+        ) || voicesList.find((v) => v.lang.startsWith("en"));
       if (match) utterance.voice = match;
 
       setGeneratedText(text.trim());
+      setIsBrowserPlaying(true);
+
+      utterance.onend = () => {
+        setIsBrowserPlaying(false);
+        utteranceRef.current = null;
+      };
+      utterance.onerror = () => {
+        setIsBrowserPlaying(false);
+        utteranceRef.current = null;
+        addNotification("error", "Browser TTS playback failed.");
+      };
+
       addNotification("info", `Playing via browser TTS (${voiceName})`);
 
       fetch("/api/history", {
@@ -589,9 +628,16 @@ export default function TextToSpeechPage() {
 
       window.speechSynthesis.speak(utterance);
     } else {
-      addNotification("error", "Kokoro server unavailable and browser TTS not supported.");
+      addNotification("error", "No TTS engine available.");
     }
-  }, [canGenerate, selectedVoiceId, text, speed, addNotification, voices]);
+    setIsGenerating(false);
+  }, [canGenerate, selectedVoiceId, text, speed, addNotification, voices, ttsEngine]);
+
+  const handleStopBrowserTts = useCallback(() => {
+    window.speechSynthesis?.cancel();
+    setIsBrowserPlaying(false);
+    utteranceRef.current = null;
+  }, []);
 
   const handleClearText = useCallback(() => {
     setText("");
@@ -626,11 +672,18 @@ export default function TextToSpeechPage() {
       )}
     >
       {/* ─── Header ─── */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">Text to Speech</h1>
-        <p className="text-sm text-[#8b8fa3]">
-          Convert your text to natural speech using Kokoro TTS
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">Text to Speech</h1>
+          <p className="text-sm text-[#8b8fa3]">
+            Convert your text to natural speech
+          </p>
+        </div>
+        {ttsEngine && (
+          <div className={`pill-badge text-[10px] ${ttsEngine === "kokoro" ? "pill-badge-accent" : "bg-bg-elevated text-text-muted"}`}>
+            {ttsEngine === "kokoro" ? "Kokoro TTS" : "Browser TTS"}
+          </div>
+        )}
       </div>
 
       {/* ─── Language Filter ─── */}
@@ -893,8 +946,8 @@ export default function TextToSpeechPage() {
           </svg>
         )}
         <button
-          onClick={handleGenerate}
-          disabled={!canGenerate}
+          onClick={isBrowserPlaying ? handleStopBrowserTts : handleGenerate}
+          disabled={!canGenerate && !isBrowserPlaying}
           className={cn(
             "btn-generate relative w-full text-base font-semibold flex items-center justify-center gap-2",
             !canGenerate && "opacity-40 cursor-not-allowed"
@@ -922,6 +975,13 @@ export default function TextToSpeechPage() {
                 />
               </svg>
               Generating voice...
+            </>
+          ) : isBrowserPlaying ? (
+            <>
+              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+              </svg>
+              Stop
             </>
           ) : (
             <>
@@ -984,36 +1044,37 @@ export default function TextToSpeechPage() {
       )}
 
       {/* ─── Inline result preview ─── */}
-      {generatedAudioUrl && !isGenerating && (
+      {(generatedAudioUrl || isBrowserPlaying) && !isGenerating && (
         <div className="eleven-card eleven-glow-bg mb-6 animate-fade-in-up p-5">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs text-text-muted">
-              Generated with {selectedVoice?.name} at {speed}x speed
+              {generatedAudioUrl
+                ? `Generated with ${selectedVoice?.name} at ${speed}x speed`
+                : `Playing via browser TTS (${selectedVoice?.name})`}
             </p>
-            <span className="pill-badge pill-badge-accent text-[10px]">
-              Kokoro TTS
+            <span className={`pill-badge text-[10px] ${ttsEngine === "kokoro" ? "pill-badge-accent" : "bg-bg-elevated text-text-muted"}`}>
+              {ttsEngine === "kokoro" ? "Kokoro TTS" : "Browser TTS"}
             </span>
           </div>
           <p className="text-sm italic text-text-secondary line-clamp-2 mb-3">
             &quot;{generatedText}&quot;
           </p>
           <div className="flex items-center gap-2">
-            <Button onClick={handleGenerate} variant="secondary" size="sm">
-              <svg
-                className="h-3.5 w-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              Regenerate
-            </Button>
+            {generatedAudioUrl ? (
+              <Button onClick={handleGenerate} variant="secondary" size="sm">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Regenerate
+              </Button>
+            ) : isBrowserPlaying ? (
+              <Button onClick={handleStopBrowserTts} variant="secondary" size="sm">
+                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                </svg>
+                Stop
+              </Button>
+            ) : null}
           </div>
         </div>
       )}
