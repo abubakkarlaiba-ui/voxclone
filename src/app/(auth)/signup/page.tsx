@@ -3,14 +3,14 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { NotificationContainer } from "@/components/ui/Notification";
 import { useNotification } from "@/hooks";
 import { APP_NAME } from "@/lib/constants";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { addNotification } = useNotification();
+  const { notifications, addNotification, removeNotification } = useNotification();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,11 +42,12 @@ export default function SignupPage() {
       const data = await res.json();
       if (data.success) {
         addNotification("success", `Welcome, ${data.data.name}!`);
-        router.push("/studio");
+        setTimeout(() => router.push("/studio"), 500);
       } else {
         addNotification("error", data.error?.message || "Signup failed");
       }
-    } catch {
+    } catch (err) {
+      console.error("Signup error:", err);
       addNotification("error", "Failed to connect to server");
     } finally {
       setIsLoading(false);
@@ -118,6 +119,7 @@ export default function SignupPage() {
           Sign in
         </Link>
       </p>
+      <NotificationContainer notifications={notifications} onDismiss={removeNotification} />
     </div>
   );
 }

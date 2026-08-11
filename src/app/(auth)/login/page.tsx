@@ -3,9 +3,9 @@
 import { Suspense, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { NotificationContainer } from "@/components/ui/Notification";
 import { useNotification } from "@/hooks";
 import { APP_NAME } from "@/lib/constants";
 
@@ -13,7 +13,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/studio";
-  const { addNotification } = useNotification();
+  const { notifications, addNotification, removeNotification } = useNotification();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,11 +33,12 @@ function LoginForm() {
       const data = await res.json();
       if (data.success) {
         addNotification("success", `Welcome back, ${data.data.name}!`);
-        router.push(from);
+        setTimeout(() => router.push(from), 500);
       } else {
         addNotification("error", data.error?.message || "Login failed");
       }
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err);
       addNotification("error", "Failed to connect to server");
     } finally {
       setIsLoading(false);
@@ -99,6 +100,7 @@ function LoginForm() {
           Sign up
         </Link>
       </p>
+      <NotificationContainer notifications={notifications} onDismiss={removeNotification} />
     </div>
   );
 }
