@@ -505,7 +505,6 @@ export default function TextToSpeechPage() {
     if (!canGenerate) return;
     setIsGenerating(true);
 
-    // Cleanup old URL
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
       objectUrlRef.current = null;
@@ -525,27 +524,55 @@ export default function TextToSpeechPage() {
         }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => null);
-        const msg =
-          errData?.error?.message ||
-          `Generation failed (${res.status}). Please try again.`;
-        addNotification("error", msg);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        objectUrlRef.current = url;
+        setGeneratedAudioUrl(url);
+        setGeneratedBlob(blob);
+        setGeneratedText(text.trim());
+        addNotification("success", "Speech generated!");
+
+        const voiceName =
+          voices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
+        fetch("/api/history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            voiceId: selectedVoiceId,
+            voiceName,
+            text: text.trim(),
+            audioUrl: "",
+            duration: 0,
+            format: "mp3",
+            options: { speed },
+          }),
+        }).catch(() => {});
         return;
       }
 
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      objectUrlRef.current = url;
+      const errData = await res.json().catch(() => null);
+      const errMsg = errData?.error?.message || `Kokoro server unavailable (${res.status})`;
+      console.warn("Kokoro TTS failed, using browser SpeechSynthesis:", errMsg);
+    } catch (err) {
+      console.warn("Kokoro TTS unreachable, using browser SpeechSynthesis:", err);
+    }
 
-      setGeneratedAudioUrl(url);
-      setGeneratedBlob(blob);
-      setGeneratedText(text.trim());
-      addNotification("success", "Speech generated successfully!");
-
-      // Save to history
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
       const voiceName =
         voices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text.trim());
+      utterance.rate = speed;
+      const voicesList = window.speechSynthesis.getVoices();
+      const match = voicesList.find(
+        (v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("google")
+      ) || voicesList.find((v) => v.lang.startsWith("en"));
+      if (match) utterance.voice = match;
+
+      setGeneratedText(text.trim());
+      addNotification("info", `Playing via browser TTS (${voiceName})`);
+
       fetch("/api/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -559,13 +586,10 @@ export default function TextToSpeechPage() {
           options: { speed },
         }),
       }).catch(() => {});
-    } catch {
-      addNotification(
-        "error",
-        "Failed to generate speech. Please try again."
-      );
-    } finally {
-      setIsGenerating(false);
+
+      window.speechSynthesis.speak(utterance);
+    } else {
+      addNotification("error", "Kokoro server unavailable and browser TTS not supported.");
     }
   }, [canGenerate, selectedVoiceId, text, speed, addNotification, voices]);
 
