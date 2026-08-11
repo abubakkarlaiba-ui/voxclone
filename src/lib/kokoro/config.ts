@@ -31,7 +31,24 @@ export const kokoroConfig = {
   maxTextLength: 10000,
 
   /** Request timeout in milliseconds */
-  timeoutMs: 60_000,
+  timeoutMs: 120_000,
 } as const;
+
+/**
+ * Map of language codes to Kokoro's single-letter lang codes.
+ * Kokoro uses: a=American English, b=British English, e=Spanish,
+ * f=French, h=Hindi, i=Italian, p=Portuguese, j=Japanese, z=Chinese
+ */
+export const KOKORO_LANG_MAP: Record<string, string> = {
+  en: "a",
+  ja: "j",
+  zh: "z",
+  es: "e",
+  fr: "f",
+  hi: "h",
+  it: "i",
+  pt: "p",
+  ko: "a",
+};
 
 export type KokoroFormat = "mp3" | "wav";

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kokoroConfig } from "@/lib/kokoro/config";
+import { kokoroConfig, KOKORO_LANG_MAP } from "@/lib/kokoro/config";
 import { getKokoroVoice } from "@/lib/kokoro/voices";
 
 interface TtsRequestBody {
@@ -69,7 +69,7 @@ export async function POST(
         text: trimmed,
         voice: voiceId,
         speed: clampedSpeed,
-        lang: voiceInfo.languageCode,
+        lang: KOKORO_LANG_MAP[voiceInfo.languageCode] || "a",
         format: outputFormat,
       }),
       signal: AbortSignal.timeout(kokoroConfig.timeoutMs),
