@@ -45,6 +45,9 @@ export async function ensureSchema(): Promise<void> {
       created_at TEXT NOT NULL DEFAULT (now()::text)
     )`;
 
+  // Add avatar_url column if table existed before it was added
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT`;
+
   await sql`
     CREATE TABLE IF NOT EXISTS voice_profiles (
       id TEXT PRIMARY KEY,
