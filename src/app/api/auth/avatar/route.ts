@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ApiResponse } from "@/types";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
-import { dbQuery } from "@/lib/db";
+import { dbExecute } from "@/lib/db";
 
 const MAX_AVATAR_SIZE = 200 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -59,7 +59,15 @@ export async function POST(
     const base64 = btoa(binary);
     const avatarUrl = `data:${file.type};base64,${base64}`;
 
-    await dbQuery`UPDATE users SET avatar_url = ${avatarUrl} WHERE id = ${session.userId}`;
+    console.log(`[Avatar] User: ${session.userId}, File size: ${file.size}, Base64 length: ${avatarUrl.length}`);
+
+    try {
+      await dbExecute("UPDATE users SET avatar_url = $1 WHERE id = $2", [avatarUrl, session.userId]);
+      console.log("[Avatar] DB update successful");
+    } catch (dbErr) {
+      console.error("[Avatar] DB update failed:", dbErr);
+      throw dbErr;
+    }
 
     return NextResponse.json({
       success: true,
@@ -95,7 +103,7 @@ export async function DELETE(
       );
     }
 
-    await dbQuery`UPDATE users SET avatar_url = NULL WHERE id = ${session.userId}`;
+    await dbExecute("UPDATE users SET avatar_url = NULL WHERE id = $1", [session.userId]);
 
     return NextResponse.json({
       success: true,

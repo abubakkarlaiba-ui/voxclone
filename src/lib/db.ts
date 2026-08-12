@@ -19,6 +19,14 @@ export async function dbQuery(strings: TemplateStringsArray, ...values: unknown[
   return [];
 }
 
+export async function dbExecute(sql: string, params?: unknown[]): Promise<Record<string, unknown>[]> {
+  const fn = getNeonFn();
+  const result = await (fn as Function)(sql, params || []);
+  if (Array.isArray(result)) return result as Record<string, unknown>[];
+  if (result && typeof result === "object" && "rows" in result) return (result as { rows: Record<string, unknown>[] }).rows;
+  return [];
+}
+
 let initialized = false;
 
 export async function ensureSchema(): Promise<void> {
