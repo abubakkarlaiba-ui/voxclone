@@ -591,10 +591,43 @@ export default function TextToSpeechPage() {
       utteranceRef.current = utterance;
 
       const voicesList = window.speechSynthesis.getVoices();
-      const match =
-        voicesList.find(
-          (v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("google")
-        ) || voicesList.find((v) => v.lang.startsWith("en"));
+      const selected = voices.find((v) => v.id === selectedVoiceId);
+      const lang = selected?.languageCode || "en";
+      const gender = selected?.gender || "female";
+
+      const langPrefixes: Record<string, string[]> = {
+        en: ["en-US", "en-GB", "en"],
+        ja: ["ja-JP", "ja"],
+        zh: ["zh-CN", "zh-TW", "zh"],
+        es: ["es-MX", "es-ES", "es"],
+        fr: ["fr-FR", "fr-CA", "fr"],
+        hi: ["hi-IN", "hi"],
+        it: ["it-IT", "it"],
+        pt: ["pt-BR", "pt-PT", "pt"],
+      };
+
+      const prefixes = langPrefixes[lang] || ["en-US", "en"];
+      let match: SpeechSynthesisVoice | undefined;
+
+      for (const prefix of prefixes) {
+        const candidates = voicesList.filter((v) => v.lang.startsWith(prefix));
+        if (candidates.length === 0) continue;
+
+        if (gender === "male") {
+          match = candidates.find((v) => /male|man|guy|david|james|daniel|mark|google.*uk.*male/i.test(v.name))
+            || candidates.find((v) => /female|woman|samantha|zira|google/i.test(v.name) === null)
+            || candidates[0];
+        } else {
+          match = candidates.find((v) => /female|woman|samantha|zira|karen|moira|google/i.test(v.name))
+            || candidates[0];
+        }
+        if (match) break;
+      }
+
+      if (!match) {
+        match = voicesList.find((v) => v.lang.startsWith("en")) || voicesList[0];
+      }
+
       if (match) utterance.voice = match;
 
       setGeneratedText(text.trim());
