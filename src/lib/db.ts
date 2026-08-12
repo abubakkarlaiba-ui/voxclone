@@ -21,7 +21,7 @@ export async function dbQuery(strings: TemplateStringsArray, ...values: unknown[
 
 export async function dbExecute(sql: string, params?: unknown[]): Promise<Record<string, unknown>[]> {
   const fn = getNeonFn();
-  const result = await (fn as Function)(sql, params || []);
+  const result = await (fn as any).query(sql, params || []);
   if (Array.isArray(result)) return result as Record<string, unknown>[];
   if (result && typeof result === "object" && "rows" in result) return (result as { rows: Record<string, unknown>[] }).rows;
   return [];
