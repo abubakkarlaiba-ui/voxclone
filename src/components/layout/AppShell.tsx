@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
+import { useUser } from "@/hooks";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -10,6 +11,10 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useUser();
+
+  const userName = user?.name || "User";
+  const initials = userName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
     <div className="flex min-h-screen bg-[#090a0f]">
@@ -30,9 +35,17 @@ export function AppShell({ children }: AppShellProps) {
           <div className="flex-1" />
 
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 text-xs font-semibold text-[#818cf8]">
-              AM
-            </div>
+            {user?.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={userName}
+                className="h-8 w-8 rounded-full object-cover ring-1 ring-white/[0.1]"
+              />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 text-xs font-semibold text-[#818cf8]">
+                {initials}
+              </div>
+            )}
           </div>
         </header>
 

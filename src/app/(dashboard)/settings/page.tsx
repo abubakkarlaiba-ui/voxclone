@@ -85,7 +85,7 @@ export default function SettingsPage() {
       const url = URL.createObjectURL(file);
       img.onload = () => {
         let { width, height } = img;
-        const maxDim = 256;
+        const maxDim = 128;
         if (width > maxDim || height > maxDim) {
           if (width > height) {
             height = Math.round((height / width) * maxDim);
@@ -108,7 +108,7 @@ export default function SettingsPage() {
             }
           },
           "image/jpeg",
-          0.7
+          0.5
         );
       };
       img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
@@ -123,6 +123,12 @@ export default function SettingsPage() {
     setIsUploadingAvatar(true);
     try {
       const compressed = await compressImage(file);
+
+      if (compressed.size > 200 * 1024) {
+        addNotification("error", "Image too large after compression. Try a simpler image.");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("avatar", compressed);
 
@@ -279,7 +285,7 @@ export default function SettingsPage() {
                   Remove Photo
                 </Button>
               )}
-              <p className="text-[11px] text-[#5c6073]">JPEG, PNG, WebP, or GIF. Max 2MB.</p>
+              <p className="text-[11px] text-[#5c6073]">JPEG, PNG, WebP, or GIF. Max 200KB.</p>
             </div>
           </div>
         </CardContent>

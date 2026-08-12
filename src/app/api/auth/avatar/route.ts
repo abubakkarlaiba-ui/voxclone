@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ApiResponse } from "@/types";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
-import { updateUser } from "@/lib/user-store";
+import { dbQuery } from "@/lib/db";
 
-const MAX_AVATAR_SIZE = 500 * 1024;
+const MAX_AVATAR_SIZE = 200 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 export async function POST(
@@ -45,22 +45,21 @@ export async function POST(
 
     if (file.size > MAX_AVATAR_SIZE) {
       return NextResponse.json(
-        { success: false, error: { code: "VALIDATION_ERROR", message: "File too large. Maximum 2MB." }, timestamp: new Date().toISOString() },
+        { success: false, error: { code: "VALIDATION_ERROR", message: "File too large. Maximum 200KB. Please compress your image first." }, timestamp: new Date().toISOString() },
         { status: 400 }
       );
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const base64 = Buffer.from(arrayBuffer).toString("base64");
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
     const avatarUrl = `data:${file.type};base64,${base64}`;
 
-    const updated = await updateUser(session.userId, { avatarUrl });
-    if (!updated) {
-      return NextResponse.json(
-        { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to update avatar" }, timestamp: new Date().toISOString() },
-        { status: 500 }
-      );
-    }
+    await dbQuery`UPDATE users SET avatar_url = ${avatarUrl} WHERE id = ${session.userId}`;
 
     return NextResponse.json({
       success: true,
@@ -96,7 +95,7 @@ export async function DELETE(
       );
     }
 
-    await updateUser(session.userId, { avatarUrl: null });
+    await dbQuery`UPDATE users SET avatar_url = NULL WHERE id = ${session.userId}`;
 
     return NextResponse.json({
       success: true,
