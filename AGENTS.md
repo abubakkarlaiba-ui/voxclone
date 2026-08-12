@@ -4,17 +4,17 @@
 
 When the user asks to deploy to Vercel, follow these steps IN ORDER:
 
-1. **Start Kokoro TTS server locally** (for local testing):
+1. **Start Edge TTS server locally** (for local testing):
    ```powershell
-   Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'C:\Users\HOME\Desktop\Kokoro-FastAPI'; python server.py"
+   Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'C:\Users\HOME\Desktop\ai voice generator and text in voice website\voxclone\tts-server'; python server.py"
    ```
-   Wait for "Model loaded" message before continuing.
 
 2. **Start Next.js dev server** (for local testing):
    ```powershell
    cd "C:\Users\HOME\Desktop\ai voice generator and text in voice website\voxclone"
    npm run dev
    ```
+   Or use the shortcut: `.\start-dev.ps1`
 
 3. **Build the project**:
    ```powershell
@@ -33,14 +33,15 @@ When the user asks to deploy to Vercel, follow these steps IN ORDER:
 
 ## Architecture Notes
 
-- **Kokoro TTS** runs locally on port 8000 (Python, `kokoro` pip package)
-  - Only accessible from localhost, NOT from Vercel
-  - Config: `C:\Users\HOME\Desktop\Kokoro-FastAPI\server.py`
-  - Endpoint: `POST http://localhost:8000/v1/tts`
+- **Edge TTS server** runs locally on port 8000 (Python + edge-tts package)
+  - 50+ free Microsoft voices, multiple languages
+  - Config: `tts-server/server.py`
+  - Endpoints: `POST /v1/tts`, `GET /v1/voices`
+  - For Vercel: deploy on Railway using `tts-server/Dockerfile`
   
-- **Vercel deployment** uses **browser SpeechSynthesis** as fallback
-  - The TTS page auto-detects Kokoro availability
-  - Badge shows "Kokoro TTS" or "Browser TTS" in the UI
+- **Vercel deployment** proxies TTS to the Edge TTS server
+  - TTS page fetches voices from `/api/tts/voices`
+  - Falls back to browser SpeechSynthesis if server unavailable
   
 - **Neon DB** for persistent storage (PostgreSQL)
   - Connection string set as `DATABASE_URL` env var in Vercel
@@ -52,9 +53,17 @@ When the user asks to deploy to Vercel, follow these steps IN ORDER:
 
 | Task | Command |
 |------|---------|
-| Start Kokoro server | `cd C:\Users\HOME\Desktop\Kokoro-FastAPI; python server.py` |
+| Start TTS server | `cd ...tts-server; python server.py` |
 | Start Next.js dev | `cd ...voxclone; npm run dev` |
 | Start both | `.\start-dev.ps1` |
 | Build | `npm run build` |
 | Deploy | `git add -A; git commit -m "..."; git push` |
-| Test Kokoro locally | `curl -X POST http://localhost:8000/v1/tts -H "Content-Type: application/json" -d '{"text":"hello","voice":"af_heart","speed":1.0,"lang":"a","format":"mp3"}'` |
+| Test TTS locally | `curl -X POST http://localhost:8000/v1/tts -H "Content-Type: application/json" -d '{"text":"hello","voice":"en-US-JennyNeural","speed":1.0,"format":"mp3"}'` |
+
+## Railway Deployment (for TTS server)
+
+1. Push `tts-server/` to a separate GitHub repo
+2. Go to https://railway.app
+3. New Project > Deploy from GitHub repo
+4. Railway auto-detects the Dockerfile
+5. Set environment variable `TTS_SERVER_URL` in Vercel to the Railway URL
