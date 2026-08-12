@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kokoroConfig, KOKORO_LANG_MAP } from "@/lib/kokoro/config";
-import { getKokoroVoice } from "@/lib/kokoro/voices";
+
+const TTS_SERVER_URL = process.env.TTS_SERVER_URL || "http://localhost:8000";
 
 interface TtsRequestBody {
   text?: string;
   voice?: string;
   speed?: number;
-  language?: string;
   format?: string;
 }
 
@@ -15,9 +14,8 @@ export async function POST(
 ): Promise<NextResponse> {
   try {
     const body = (await request.json()) as TtsRequestBody;
-    const { text, voice, speed, language, format } = body;
+    const { text, voice, speed, format } = body;
 
-    // ─── Validate text ───
     if (!text || typeof text !== "string" || text.trim().length === 0) {
       return NextResponse.json(
         { success: false, error: { code: "VALIDATION_ERROR", message: "Please enter some text first." } },
@@ -26,81 +24,52 @@ export async function POST(
     }
 
     const trimmed = text.trim();
-    if (trimmed.length > kokoroConfig.maxTextLength) {
+    if (trimmed.length > 5000) {
       return NextResponse.json(
-        { success: false, error: { code: "VALIDATION_ERROR", message: `Text is too long. Maximum ${kokoroConfig.maxTextLength.toLocaleString()} characters.` } },
+        { success: false, error: { code: "VALIDATION_ERROR", message: "Text is too long. Maximum 5,000 characters." } },
         { status: 400 }
       );
     }
 
-    // ─── Validate voice ───
-    const voiceId = voice || kokoroConfig.defaultVoice;
-    const voiceInfo = getKokoroVoice(voiceId);
-    if (!voiceInfo) {
-      return NextResponse.json(
-        { success: false, error: { code: "VALIDATION_ERROR", message: "The selected voice is unavailable." } },
-        { status: 400 }
-      );
-    }
+    const ttsUrl = `${TTS_SERVER_URL.replace(/\/+$/, "")}/v1/tts`;
 
-    // ─── Validate speed ───
-    const clampedSpeed = Math.max(
-      kokoroConfig.minSpeed,
-      Math.min(kokoroConfig.maxSpeed, speed ?? kokoroConfig.defaultSpeed)
-    );
-
-    // ─── Validate format ───
-    const outputFormat = (format === "wav" ? "wav" : "mp3") as string;
-
-    // ─── Call Kokoro TTS server ───
-    const kokoroUrl = `${kokoroConfig.apiUrl.replace(/\/+$/, "")}/v1/tts`;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (kokoroConfig.apiKey) {
-      headers["Authorization"] = `Bearer ${kokoroConfig.apiKey}`;
-    }
-
-    const kokoroResponse = await fetch(kokoroUrl, {
+    const ttsResponse = await fetch(ttsUrl, {
       method: "POST",
-      headers,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         text: trimmed,
-        voice: voiceId,
-        speed: clampedSpeed,
-        lang: KOKORO_LANG_MAP[voiceInfo.languageCode] || "a",
-        format: outputFormat,
+        voice: voice || "en-US-JennyNeural",
+        speed: Math.max(0.5, Math.min(2.0, speed ?? 1.0)),
+        format: format === "wav" ? "wav" : "mp3",
       }),
-      signal: AbortSignal.timeout(kokoroConfig.timeoutMs),
+      signal: AbortSignal.timeout(30000),
     });
 
-    if (!kokoroResponse.ok) {
+    if (!ttsResponse.ok) {
       let detail = "Voice generation failed. Please try again.";
       try {
-        const errBody = await kokoroResponse.text();
+        const errBody = await ttsResponse.text();
         const parsed = JSON.parse(errBody);
         detail = parsed.detail || parsed.message || detail;
       } catch {
         // keep default
       }
 
-      if (kokoroResponse.status === 503 || kokoroResponse.status === 502) {
+      if (ttsResponse.status === 502 || ttsResponse.status === 503) {
         return NextResponse.json(
-          { success: false, error: { code: "SERVICE_UNAVAILABLE", message: "Kokoro TTS server is unavailable." } },
+          { success: false, error: { code: "SERVICE_UNAVAILABLE", message: "TTS server is unavailable." } },
           { status: 503 }
         );
       }
 
       return NextResponse.json(
         { success: false, error: { code: "TTS_ERROR", message: detail } },
-        { status: kokoroResponse.status }
+        { status: ttsResponse.status }
       );
     }
 
-    // ─── Stream audio back to client ───
-    const audioBuffer = await kokoroResponse.arrayBuffer();
-    const contentType = kokoroResponse.headers.get("content-type") || `audio/${outputFormat === "wav" ? "wav" : "mpeg"}`;
+    const audioBuffer = await ttsResponse.arrayBuffer();
+    const contentType = ttsResponse.headers.get("content-type") || "audio/mpeg";
 
     return new NextResponse(audioBuffer, {
       status: 200,
@@ -112,7 +81,7 @@ export async function POST(
   } catch (error: unknown) {
     if (error instanceof Error && error.name === "TimeoutError") {
       return NextResponse.json(
-        { success: false, error: { code: "TIMEOUT", message: "Kokoro TTS server is unavailable." } },
+        { success: false, error: { code: "TIMEOUT", message: "TTS server timed out." } },
         { status: 504 }
       );
     }

@@ -421,30 +421,31 @@ export default function TextToSpeechPage() {
   const objectUrlRef = useRef<string | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Check Kokoro availability on mount
+  // Check TTS server availability
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const res = await fetch("/api/tts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: "ping", voice: "af_heart", speed: 1.0, format: "mp3" }),
+        const res = await fetch("/api/tts/voices", {
           signal: AbortSignal.timeout(5000),
         });
         if (!active) return;
-        setTtsEngine(res.status === 502 || res.status === 503 || res.status === 504 || !res.ok ? "browser" : "kokoro");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data?.length > 0) {
+            setTtsEngine("kokoro");
+            setVoices(data.data);
+            setSelectedVoiceId(data.data[0].id);
+            setIsLoading(false);
+            return;
+          }
+        }
+        setTtsEngine("browser");
       } catch {
         if (active) setTtsEngine("browser");
       }
-    })();
-    return () => { active = false; };
-  }, []);
 
-  // Load voices from static data
-  useEffect(() => {
-    let active = true;
-    (async () => {
+      // Fallback to static Kokoro voices
       try {
         const mod = await import("@/lib/kokoro/voices");
         if (!active) return;
@@ -458,9 +459,7 @@ export default function TextToSpeechPage() {
         if (active) setIsLoading(false);
       }
     })();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
   // Cleanup on unmount
@@ -558,7 +557,7 @@ export default function TextToSpeechPage() {
           setGeneratedBlob(blob);
           setGeneratedText(text.trim());
           setTtsEngine("kokoro");
-          addNotification("success", "Speech generated with Kokoro!");
+          addNotification("success", "Speech generated!");
 
           fetch("/api/history", {
             method: "POST",
@@ -714,7 +713,7 @@ export default function TextToSpeechPage() {
         </div>
         {ttsEngine && (
           <div className={`pill-badge text-[10px] ${ttsEngine === "kokoro" ? "pill-badge-accent" : "bg-bg-elevated text-text-muted"}`}>
-            {ttsEngine === "kokoro" ? "Kokoro TTS" : "Browser TTS"}
+            {ttsEngine === "kokoro" ? "Edge TTS" : "Browser TTS"}
           </div>
         )}
       </div>
@@ -1086,7 +1085,7 @@ export default function TextToSpeechPage() {
                 : `Playing via browser TTS (${selectedVoice?.name})`}
             </p>
             <span className={`pill-badge text-[10px] ${ttsEngine === "kokoro" ? "pill-badge-accent" : "bg-bg-elevated text-text-muted"}`}>
-              {ttsEngine === "kokoro" ? "Kokoro TTS" : "Browser TTS"}
+              {ttsEngine === "kokoro" ? "Edge TTS" : "Browser TTS"}
             </span>
           </div>
           <p className="text-sm italic text-text-secondary line-clamp-2 mb-3">
