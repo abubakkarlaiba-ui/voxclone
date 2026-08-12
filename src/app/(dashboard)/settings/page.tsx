@@ -77,15 +77,15 @@ export default function SettingsPage() {
     }
   }, [user, editName, editEmail, addNotification, refresh]);
 
-  const compressImage = useCallback(async (file: File): Promise<File> => {
-    return new Promise((resolve) => {
+  const compressImage = useCallback(async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       const img = new Image();
       const url = URL.createObjectURL(file);
       img.onload = () => {
         let { width, height } = img;
-        const maxDim = 128;
+        const maxDim = 96;
         if (width > maxDim || height > maxDim) {
           if (width > height) {
             height = Math.round((height / width) * maxDim);
@@ -98,20 +98,11 @@ export default function SettingsPage() {
         canvas.width = width;
         canvas.height = height;
         ctx?.drawImage(img, 0, 0, width, height);
-        canvas.toBlob(
-          (blob) => {
-            URL.revokeObjectURL(url);
-            if (blob) {
-              resolve(new File([blob], file.name, { type: "image/jpeg", lastModified: Date.now() }));
-            } else {
-              resolve(file);
-            }
-          },
-          "image/jpeg",
-          0.5
-        );
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.4);
+        URL.revokeObjectURL(url);
+        resolve(dataUrl);
       };
-      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Failed to load image")); };
       img.src = url;
     });
   }, []);
@@ -122,28 +113,30 @@ export default function SettingsPage() {
 
     setIsUploadingAvatar(true);
     try {
-      const compressed = await compressImage(file);
+      const dataUrl = await compressImage(file);
 
-      if (compressed.size > 200 * 1024) {
+      if (dataUrl.length > 150000) {
         addNotification("error", "Image too large after compression. Try a simpler image.");
         return;
       }
 
-      const formData = new FormData();
-      formData.append("avatar", compressed);
+      console.log("[Avatar] Uploading, size:", dataUrl.length);
 
       const res = await fetch("/api/auth/avatar", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: dataUrl }),
       });
       const data = await res.json();
+      console.log("[Avatar] Response:", data);
       if (data.success) {
         addNotification("success", "Profile photo updated!");
         if (refresh) await refresh();
       } else {
         addNotification("error", data.error?.message || "Failed to upload photo");
       }
-    } catch {
+    } catch (err) {
+      console.error("[Avatar] Upload error:", err);
       addNotification("error", "Failed to upload photo");
     } finally {
       setIsUploadingAvatar(false);
