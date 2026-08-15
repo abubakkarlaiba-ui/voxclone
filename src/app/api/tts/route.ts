@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const TTS_SERVER_URL = process.env.TTS_SERVER_URL || "http://localhost:8000";
+const FISH_API_KEY = process.env.FISH_API_KEY || "";
+const FISH_API_URL = "https://api.fish.audio";
 
 interface TtsRequestBody {
   text?: string;
@@ -13,6 +14,13 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse> {
   try {
+    if (!FISH_API_KEY) {
+      return NextResponse.json(
+        { success: false, error: { code: "CONFIG_ERROR", message: "Fish Audio API key not configured." } },
+        { status: 500 }
+      );
+    }
+
     const body = (await request.json()) as TtsRequestBody;
     const { text, voice, speed, format } = body;
 
@@ -31,45 +39,46 @@ export async function POST(
       );
     }
 
-    const ttsUrl = `${TTS_SERVER_URL.replace(/\/+$/, "")}/v1/tts`;
+    const payload: Record<string, unknown> = {
+      text: trimmed,
+      format: format === "wav" ? "wav" : "mp3",
+    };
 
-    const ttsResponse = await fetch(ttsUrl, {
+    if (voice) {
+      payload.reference_id = voice;
+    }
+
+    if (speed && speed !== 1.0) {
+      payload.prosody = { speed: Math.max(0.5, Math.min(2.0, speed)) };
+    }
+
+    const fishResponse = await fetch(`${FISH_API_URL}/v1/tts`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: trimmed,
-        voice: voice || "en-US-JennyNeural",
-        speed: Math.max(0.5, Math.min(2.0, speed ?? 1.0)),
-        format: format === "wav" ? "wav" : "mp3",
-      }),
+      headers: {
+        "Authorization": `Bearer ${FISH_API_KEY}`,
+        "Content-Type": "application/json",
+        "model": "s2.1-pro-free",
+      },
+      body: JSON.stringify(payload),
       signal: AbortSignal.timeout(30000),
     });
 
-    if (!ttsResponse.ok) {
-      let detail = "Voice generation failed. Please try again.";
+    if (!fishResponse.ok) {
+      let detail = "Voice generation failed.";
       try {
-        const errBody = await ttsResponse.text();
+        const errBody = await fishResponse.text();
         const parsed = JSON.parse(errBody);
         detail = parsed.detail || parsed.message || detail;
-      } catch {
-        // keep default
-      }
-
-      if (ttsResponse.status === 502 || ttsResponse.status === 503) {
-        return NextResponse.json(
-          { success: false, error: { code: "SERVICE_UNAVAILABLE", message: "TTS server is unavailable." } },
-          { status: 503 }
-        );
-      }
+      } catch {}
 
       return NextResponse.json(
         { success: false, error: { code: "TTS_ERROR", message: detail } },
-        { status: ttsResponse.status }
+        { status: fishResponse.status }
       );
     }
 
-    const audioBuffer = await ttsResponse.arrayBuffer();
-    const contentType = ttsResponse.headers.get("content-type") || "audio/mpeg";
+    const audioBuffer = await fishResponse.arrayBuffer();
+    const contentType = fishResponse.headers.get("content-type") || "audio/mpeg";
 
     return new NextResponse(audioBuffer, {
       status: 200,
@@ -81,14 +90,14 @@ export async function POST(
   } catch (error: unknown) {
     if (error instanceof Error && error.name === "TimeoutError") {
       return NextResponse.json(
-        { success: false, error: { code: "TIMEOUT", message: "TTS server timed out." } },
+        { success: false, error: { code: "TIMEOUT", message: "Fish Audio API timed out." } },
         { status: 504 }
       );
     }
 
     console.error("TTS API error:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Voice generation failed. Please try again." } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Voice generation failed." } },
       { status: 500 }
     );
   }

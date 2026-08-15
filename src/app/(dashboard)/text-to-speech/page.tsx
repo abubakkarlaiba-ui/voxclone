@@ -427,7 +427,7 @@ export default function TextToSpeechPage() {
     (async () => {
       try {
         const res = await fetch("/api/tts/voices", {
-          signal: AbortSignal.timeout(5000),
+          signal: AbortSignal.timeout(8000),
         });
         if (!active) return;
         if (res.ok) {
