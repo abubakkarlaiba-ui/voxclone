@@ -417,9 +417,15 @@ export default function TextToSpeechPage() {
   const [selectedLang, setSelectedLang] = useState<string | null>(null);
   const [ttsEngine, setTtsEngine] = useState<"kokoro" | "browser" | null>(null);
   const [isBrowserPlaying, setIsBrowserPlaying] = useState(false);
+  const [myVoiceAudio, setMyVoiceAudio] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordTime, setRecordTime] = useState(0);
 
   const objectUrlRef = useRef<string | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordChunksRef = useRef<Blob[]>([]);
+  const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Check TTS server availability
   useEffect(() => {
@@ -470,8 +476,59 @@ export default function TextToSpeechPage() {
     };
   }, []);
 
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      mediaRecorderRef.current = mr;
+      recordChunksRef.current = [];
+
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) recordChunksRef.current.push(e.data);
+      };
+
+      mr.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(recordChunksRef.current, { type: "audio/webm" });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setMyVoiceAudio(reader.result as string);
+          addNotification("success", "Voice sample recorded! Select 'My Voice' to use it.");
+        };
+        reader.readAsDataURL(blob);
+        setIsRecording(false);
+        setRecordTime(0);
+      };
+
+      mr.start();
+      setIsRecording(true);
+      setRecordTime(0);
+      recordTimerRef.current = setInterval(() => {
+        setRecordTime((prev) => prev + 1);
+      }, 1000);
+    } catch {
+      addNotification("error", "Microphone access denied. Please allow microphone access.");
+    }
+  }, [addNotification]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
+    if (recordTimerRef.current) {
+      clearInterval(recordTimerRef.current);
+      recordTimerRef.current = null;
+    }
+  }, []);
+
+  const myVoice: KokoroVoice | null = myVoiceAudio
+    ? { id: "__my_voice__", name: "My Voice", language: "Custom", languageCode: "en-US", gender: "neutral", description: "Your recorded voice" }
+    : null;
+
+  const allVoices = myVoice ? [myVoice, ...voices] : voices;
+
   const selectedVoice = useMemo(
-    () => voices.find((v) => v.id === selectedVoiceId),
+    () => allVoices.find((v) => v.id === selectedVoiceId),
     [voices, selectedVoiceId]
   );
 
@@ -488,7 +545,7 @@ export default function TextToSpeechPage() {
   }, [voices]);
 
   const filteredVoices = useMemo(() => {
-    let list = voices;
+    let list = allVoices;
     if (selectedLang) {
       list = list.filter((v) => v.languageCode === selectedLang);
     }
@@ -502,7 +559,7 @@ export default function TextToSpeechPage() {
       );
     }
     return list;
-  }, [voices, selectedLang, voiceSearch]);
+  }, [allVoices, selectedLang, voiceSearch]);
 
   const textError = useMemo(() => {
     const trimmed = text.trim();
@@ -533,7 +590,21 @@ export default function TextToSpeechPage() {
     setGeneratedBlob(null);
 
     const voiceName =
-      voices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
+      allVoices.find((v) => v.id === selectedVoiceId)?.name || "Unknown Voice";
+
+    const isMyVoice = selectedVoiceId === "__my_voice__";
+
+    const ttsPayload: Record<string, unknown> = {
+      text: text.trim(),
+      speed,
+      format: "mp3",
+    };
+
+    if (isMyVoice && myVoiceAudio) {
+      ttsPayload.referenceAudio = myVoiceAudio;
+    } else {
+      ttsPayload.voice = selectedVoiceId;
+    }
 
     // Try Kokoro first
     if (ttsEngine === "kokoro" || ttsEngine === null) {
@@ -541,12 +612,7 @@ export default function TextToSpeechPage() {
         const res = await fetch("/api/tts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            text: text.trim(),
-            voice: selectedVoiceId,
-            speed,
-            format: "mp3",
-          }),
+          body: JSON.stringify(ttsPayload),
         });
 
         if (res.ok) {
@@ -590,7 +656,7 @@ export default function TextToSpeechPage() {
       utteranceRef.current = utterance;
 
       const voicesList = window.speechSynthesis.getVoices();
-      const selected = voices.find((v) => v.id === selectedVoiceId);
+      const selected = allVoices.find((v) => v.id === selectedVoiceId);
       const lang = selected?.languageCode || "en";
       const gender = selected?.gender || "female";
 
@@ -663,7 +729,7 @@ export default function TextToSpeechPage() {
       addNotification("error", "No TTS engine available.");
     }
     setIsGenerating(false);
-  }, [canGenerate, selectedVoiceId, text, speed, addNotification, voices, ttsEngine]);
+  }, [canGenerate, selectedVoiceId, text, speed, addNotification, allVoices, ttsEngine, myVoiceAudio]);
 
   const handleStopBrowserTts = useCallback(() => {
     window.speechSynthesis?.cancel();
@@ -716,6 +782,46 @@ export default function TextToSpeechPage() {
             {ttsEngine === "kokoro" ? "Edge TTS" : "Browser TTS"}
           </div>
         )}
+      </div>
+
+      {/* ─── Record Your Voice ─── */}
+      <div className="eleven-card mb-6 px-5 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+            </svg>
+            <span className="text-sm font-medium text-text-secondary">Record Your Voice</span>
+          </div>
+          {myVoiceAudio && (
+            <span className="pill-badge pill-badge-accent text-[10px]">Sample Ready</span>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {!isRecording ? (
+            <button
+              onClick={startRecording}
+              className="flex items-center gap-2 rounded-lg border border-border-primary/60 bg-bg-secondary/50 px-4 py-2 text-sm font-medium text-text-secondary transition-all hover:border-accent-primary/40 hover:bg-accent-primary/10 hover:text-accent-primary"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              {myVoiceAudio ? "Re-record" : "Start Recording"}
+            </button>
+          ) : (
+            <button
+              onClick={stopRecording}
+              className="flex items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition-all hover:bg-red-500/20"
+            >
+              <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
+              Stop ({Math.floor(recordTime / 60)}:{String(recordTime % 60).padStart(2, "0")})
+            </button>
+          )}
+          {myVoiceAudio && !isRecording && (
+            <audio controls src={myVoiceAudio} className="h-8 max-w-[200px]" />
+          )}
+        </div>
+        <p className="mt-2 text-[11px] text-text-muted">Record 5-30 seconds of your voice. Then select "My Voice" below to generate speech in your voice.</p>
       </div>
 
       {/* ─── Language Filter ─── */}

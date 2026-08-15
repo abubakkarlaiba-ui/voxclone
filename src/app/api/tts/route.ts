@@ -8,6 +8,8 @@ interface TtsRequestBody {
   voice?: string;
   speed?: number;
   format?: string;
+  referenceAudio?: string;
+  referenceText?: string;
 }
 
 export async function POST(
@@ -22,7 +24,7 @@ export async function POST(
     }
 
     const body = (await request.json()) as TtsRequestBody;
-    const { text, voice, speed, format } = body;
+    const { text, voice, speed, format, referenceAudio, referenceText } = body;
 
     if (!text || typeof text !== "string" || text.trim().length === 0) {
       return NextResponse.json(
@@ -44,7 +46,12 @@ export async function POST(
       format: format === "wav" ? "wav" : "mp3",
     };
 
-    if (voice) {
+    if (referenceAudio) {
+      payload.references = [{
+        audio: referenceAudio,
+        text: referenceText || trimmed.slice(0, 200),
+      }];
+    } else if (voice) {
       payload.reference_id = voice;
     }
 
