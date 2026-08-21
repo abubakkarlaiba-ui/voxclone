@@ -6,6 +6,7 @@ import { LandingHeader } from "@/components/layout/LandingHeader";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollReveal, StaggerReveal } from "@/components/ui/ScrollReveal";
 import { FloatingOrbs } from "@/components/ui/FloatingOrbs";
+import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
 
 const features = [
   {
@@ -86,6 +87,7 @@ const steps = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#090a0f]">
+      <AnimatedBackground />
       <LandingHeader />
 
       {/* Hero Section */}

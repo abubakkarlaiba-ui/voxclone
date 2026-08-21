@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/Input";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { NotificationContainer } from "@/components/ui/Notification";
+import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
 import { useNotification } from "@/hooks";
 import { APP_NAME } from "@/lib/constants";
 
@@ -46,7 +47,9 @@ function LoginForm() {
   }, [email, password, from, addNotification, router]);
 
   return (
-    <div className="eleven-card p-8">
+    <div className="flex min-h-screen items-center justify-center bg-[#090a0f] px-4">
+      <AnimatedBackground />
+      <div className="eleven-card p-8 relative z-10">
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] shadow-[0_0_30px_rgba(99,102,241,0.3)]">
           <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,6 +104,7 @@ function LoginForm() {
         </Link>
       </p>
       <NotificationContainer notifications={notifications} onDismiss={removeNotification} />
+    </div>
     </div>
   );
 }

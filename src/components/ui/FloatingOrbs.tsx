@@ -7,51 +7,29 @@ interface FloatingOrbsProps {
   count?: number;
 }
 
-const orbColors = [
-  "bg-[#6366f1]/[0.07]",
-  "bg-[#8b5cf6]/[0.05]",
-  "bg-[#22d3ee]/[0.04]",
-  "bg-[#6366f1]/[0.05]",
-  "bg-[#a78bfa]/[0.04]",
-];
-
-const orbSizes = [
-  "h-[400px] w-[400px]",
-  "h-[300px] w-[300px]",
-  "h-[350px] w-[350px]",
-  "h-[250px] w-[250px]",
-  "h-[200px] w-[200px]",
-];
-
-const orbPositions = [
-  "left-[10%] top-[15%]",
-  "right-[15%] top-[25%]",
-  "left-[40%] bottom-[20%]",
-  "right-[30%] bottom-[30%]",
-  "left-[20%] bottom-[40%]",
-];
-
-const floatAnimations = [
-  "animate-float-1",
-  "animate-float-2",
-  "animate-float-3",
-  "animate-float-1",
-  "animate-float-2",
+const orbs = [
+  { color: "rgba(99,102,241,0.25)", size: 500, x: "10%", y: "15%", anim: "animate-float-1" },
+  { color: "rgba(139,92,246,0.20)", size: 400, x: "70%", y: "20%", anim: "animate-float-2" },
+  { color: "rgba(34,211,238,0.15)", size: 350, x: "40%", y: "65%", anim: "animate-float-3" },
+  { color: "rgba(99,102,241,0.18)", size: 300, x: "75%", y: "60%", anim: "animate-float-1" },
+  { color: "rgba(167,139,250,0.15)", size: 280, x: "20%", y: "75%", anim: "animate-float-2" },
 ];
 
 export function FloatingOrbs({ className, count = 5 }: FloatingOrbsProps) {
   return (
     <div className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}>
-      {Array.from({ length: count }).map((_, i) => (
+      {orbs.slice(0, count).map((orb, i) => (
         <div
           key={i}
-          className={cn(
-            "absolute rounded-full blur-[100px]",
-            orbColors[i % orbColors.length],
-            orbSizes[i % orbSizes.length],
-            orbPositions[i % orbPositions.length],
-            floatAnimations[i % floatAnimations.length]
-          )}
+          className={cn("absolute rounded-full", orb.anim)}
+          style={{
+            width: orb.size,
+            height: orb.size,
+            left: orb.x,
+            top: orb.y,
+            background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
+            filter: "blur(60px)",
+          }}
         />
       ))}
     </div>
