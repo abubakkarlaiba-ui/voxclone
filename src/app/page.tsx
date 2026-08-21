@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ScrollReveal, StaggerReveal } from "@/components/ui/ScrollReveal";
 import { FloatingOrbs } from "@/components/ui/FloatingOrbs";
 import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
+import { HeroWaveform } from "@/components/ui/HeroWaveform";
 
 const features = [
   {
@@ -101,6 +102,10 @@ export default function Home() {
 
         <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
+            <ScrollReveal>
+              <HeroWaveform />
+            </ScrollReveal>
+
             <ScrollReveal>
               <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-[#8b8fa3] backdrop-blur-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
@@ -227,8 +232,9 @@ export default function Home() {
           <StaggerReveal className="grid gap-8 md:grid-cols-3">
             {steps.map((step, i) => (
               <div key={step.number} className="reveal relative text-center">
-                <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-lg font-bold text-white shadow-[0_0_30px_rgba(99,102,241,0.3)]">
+                <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-lg font-bold text-white shadow-[0_0_30px_rgba(99,102,241,0.3)] relative">
                   {step.number}
+                  <div className="absolute inset-0 rounded-2xl border-2 border-[#6366f1]/30 animate-ping" style={{ animationDuration: `${2 + i * 0.5}s` }} />
                 </div>
                 {i < steps.length - 1 && (
                   <div className="absolute left-[60%] top-7 hidden h-px w-full bg-gradient-to-r from-white/[0.08] to-transparent md:block" />
@@ -284,8 +290,9 @@ export default function Home() {
           <ScrollReveal>
             <div className="eleven-card eleven-glow-bg relative overflow-hidden p-12 text-center sm:p-16">
               <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-[#6366f1]/10 blur-3xl animate-float-1" />
-                <div className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-[#8b5cf6]/10 blur-3xl animate-float-2" />
+                <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-[#6366f1]/20 blur-3xl animate-float-1" />
+                <div className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-[#8b5cf6]/20 blur-3xl animate-float-2" />
+                <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#22d3ee]/10 blur-2xl animate-float-3" />
               </div>
               <div className="relative">
                 <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
