@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { VoiceProfileCard } from "@/components/voice/VoiceProfileCard";
 import { CreateVoiceProfileModal } from "@/components/voice/CreateVoiceProfileModal";
+import { ScrollReveal, StaggerReveal } from "@/components/ui/ScrollReveal";
 import { useNotification } from "@/hooks";
 import { NotificationContainer } from "@/components/ui/Notification";
 import type { VoiceProfile } from "@/types";
@@ -76,20 +77,22 @@ export default function LibraryPage() {
   return (
     <div className="py-8">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Voice Library</h1>
-          <p className="mt-1 text-sm text-[#8b8fa3]">
-            Manage your voice profiles and samples.
-          </p>
+      <ScrollReveal>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Voice Library</h1>
+            <p className="mt-1 text-sm text-[#8b8fa3]">
+              Manage your voice profiles and samples.
+            </p>
+          </div>
+          <Button onClick={() => setShowCreateModal(true)}>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            New Voice
+          </Button>
         </div>
-        <Button onClick={() => setShowCreateModal(true)}>
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          New Voice
-        </Button>
-      </div>
+      </ScrollReveal>
 
       {/* Loading */}
       {isLoading && (
@@ -121,6 +124,7 @@ export default function LibraryPage() {
       {!isLoading && !error && profiles.length > 0 && (
         <>
           {/* Stats + Search */}
+          <ScrollReveal delay={100}>
           <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-xs text-[#5c6073]">
               <span>{profiles.length} voice{profiles.length !== 1 ? "s" : ""}</span>
@@ -142,6 +146,7 @@ export default function LibraryPage() {
               />
             </div>
           </div>
+          </ScrollReveal>
 
           {/* No search results */}
           {filtered.length === 0 && (
@@ -158,7 +163,7 @@ export default function LibraryPage() {
 
           {/* Grid */}
           {filtered.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <StaggerReveal className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((profile) => (
                 <VoiceProfileCard
                   key={profile.id}
@@ -168,7 +173,7 @@ export default function LibraryPage() {
                   onDeleted={handleDeleted}
                 />
               ))}
-            </div>
+            </StaggerReveal>
           )}
 
           {/* Selected voice CTA */}

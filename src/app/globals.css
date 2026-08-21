@@ -659,3 +659,70 @@ body {
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 8px;
 }
+
+/* ─── Dashboard Grid Overlay ─── */
+@keyframes grid-drift {
+  0% { background-position: 0 0; }
+  100% { background-position: 80px 80px; }
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  animation: grid-drift 60s linear infinite;
+}
+
+/* ─── Ambient Glow Pulse ─── */
+@keyframes ambient-glow {
+  0%, 100% { opacity: 0.02; transform: scale(1); }
+  50% { opacity: 0.05; transform: scale(1.1); }
+}
+
+.ambient-glow {
+  animation: ambient-glow 8s ease-in-out infinite;
+}
+
+/* ─── Voice Wave Animation ─── */
+@keyframes voice-wave {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+.voice-wave-bar {
+  animation: voice-wave 1.2s ease-in-out infinite;
+}
+
+/* ─── Subtle Float ─── */
+@keyframes subtle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-subtle-float {
+  animation: subtle-float 4s ease-in-out infinite;
+}
+
+/* ─── Gradient Border Shimmer ─── */
+@keyframes border-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.border-shimmer {
+  background: linear-gradient(90deg, rgba(99,102,241,0.1), rgba(139,92,246,0.15), rgba(34,211,238,0.1), rgba(99,102,241,0.1));
+  background-size: 300% 100%;
+  animation: border-shimmer 4s ease infinite;
+}
+
+/* ─── Text Glow ─── */
+@keyframes text-glow {
+  0%, 100% { text-shadow: 0 0 10px rgba(99,102,241,0.2); }
+  50% { text-shadow: 0 0 20px rgba(99,102,241,0.4), 0 0 40px rgba(99,102,241,0.1); }
+}
+
+.animate-text-glow {
+  animation: text-glow 3s ease-in-out infinite;
+}

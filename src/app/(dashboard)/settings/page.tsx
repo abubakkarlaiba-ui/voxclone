@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { useUser } from "@/hooks";
 import { useNotification } from "@/hooks";
 import { NotificationContainer } from "@/components/ui/Notification";
@@ -217,13 +218,16 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Profile & Settings</h1>
-        <p className="mt-1 text-sm text-[#8b8fa3]">Manage your account settings.</p>
-      </div>
+      <ScrollReveal>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-white">Profile & Settings</h1>
+          <p className="mt-1 text-sm text-[#8b8fa3]">Manage your account settings.</p>
+        </div>
+      </ScrollReveal>
 
       {/* Profile Photo Card */}
-      <Card className="eleven-card mb-6">
+      <ScrollReveal delay={100}>
+        <Card className="eleven-card mb-6 glow-border">
         <CardHeader>
           <CardTitle>Profile Photo</CardTitle>
           <CardDescription>Your profile picture visible across the app.</CardDescription>
@@ -283,8 +287,10 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </ScrollReveal>
 
       {/* Profile Card */}
+      <ScrollReveal delay={150}>
       <Card className="eleven-card mb-6">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -354,8 +360,10 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+      </ScrollReveal>
 
       {/* Change Password */}
+      <ScrollReveal delay={200}>
       <Card className="eleven-card mb-6">
         <CardHeader>
           <CardTitle>Change Password</CardTitle>
@@ -393,8 +401,10 @@ export default function SettingsPage() {
           </form>
         </CardContent>
       </Card>
+      </ScrollReveal>
 
       {/* Danger Zone */}
+      <ScrollReveal delay={250}>
       <Card className="eleven-card border-[#ef4444]/20">
         <CardContent className="py-4">
           <div className="flex items-center justify-between">
@@ -408,6 +418,7 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </ScrollReveal>
 
       <NotificationContainer notifications={notifications} onDismiss={removeNotification} />
     </div>

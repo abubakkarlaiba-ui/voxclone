@@ -10,6 +10,7 @@ import { useNotification } from "@/hooks";
 import { NotificationContainer } from "@/components/ui/Notification";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { Waveform } from "@/components/voice/Waveform";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { formatDuration } from "@/lib/utils";
 import { formatBytes } from "@/lib/audio";
 import type { VoiceProfile } from "@/types";
@@ -241,15 +242,18 @@ export default function StudioPage() {
   return (
     <div className="mx-auto max-w-2xl py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Voice Studio</h1>
-        <p className="mt-1 text-sm text-[#8b8fa3]">
-          Record a high-quality voice sample to create your AI voice clone.
-        </p>
-      </div>
+      <ScrollReveal>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-white">Voice Studio</h1>
+          <p className="mt-1 text-sm text-[#8b8fa3]">
+            Record a high-quality voice sample to create your AI voice clone.
+          </p>
+        </div>
+      </ScrollReveal>
 
       {/* Recording Card */}
-      <Card className="eleven-card mb-6">
+      <ScrollReveal delay={100}>
+      <Card className="eleven-card mb-6 glow-border">
         <CardContent className="flex flex-col items-center py-10">
           {/* Permission request state */}
           {recorder.permission === "idle" && !hasInteracted && (
@@ -461,9 +465,11 @@ export default function StudioPage() {
           )}
         </CardContent>
       </Card>
+      </ScrollReveal>
 
       {/* Tips */}
       {isIdle && recorder.permission === "granted" && (
+        <ScrollReveal delay={200}>
         <Card className="eleven-card">
           <CardContent className="py-5">
             <h3 className="mb-3 text-sm font-semibold text-white">Recording Tips</h3>
@@ -495,6 +501,7 @@ export default function StudioPage() {
             </ul>
           </CardContent>
         </Card>
+        </ScrollReveal>
       )}
 
       <NotificationContainer notifications={notifications} onDismiss={removeNotification} />
